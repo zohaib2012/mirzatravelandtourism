@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { publicAPI } from "../../services/api";
 import { FaPlane, FaKaaba, FaCalculator, FaBoxOpen, FaCheckCircle, FaHeadset, FaEye, FaEyeSlash } from "react-icons/fa";
+import ForgotPasswordModal from "../../components/common/ForgotPasswordModal";
 import toast from "react-hot-toast";
 
 const Home = () => {
@@ -13,6 +14,7 @@ const Home = () => {
   const [deals, setDeals] = useState([]);
   const [loginForm, setLoginForm] = useState({ agentCode: "", email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
+  const [forgotOpen, setForgotOpen] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
 
   useEffect(() => {
@@ -120,7 +122,8 @@ const Home = () => {
                   Don't have an account? <Link to="/register" className="text-primary font-semibold hover:text-accent">Sign Up</Link>
                 </p>
                 <p>
-                  <button className="text-primary hover:text-accent text-sm">Forgot Password? Click here</button>
+                  <button type="button" onClick={() => setForgotOpen(true)} className="text-primary hover:text-accent text-sm">Forgot Password? Click here</button>
+                  {forgotOpen && <ForgotPasswordModal onClose={() => setForgotOpen(false)} />}
                 </p>
                 <p className="text-gray-500 flex items-center justify-center gap-2">
                   <FaHeadset className="text-accent" /> Helpline: +92 3000381533

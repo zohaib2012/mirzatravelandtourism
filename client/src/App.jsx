@@ -20,8 +20,12 @@ import AdminLogin from "./pages/auth/AdminLogin";
 
 // Agent Pages
 import AgentDashboard from "./pages/agent/Dashboard";
+import FlightGroups from "./pages/agent/FlightGroups";
 import Bookings from "./pages/agent/Bookings";
 import BookingDetail from "./pages/agent/BookingDetail";
+import UmrahPackages from "./pages/agent/UmrahPackages";
+import UmrahCalculator from "./pages/agent/UmrahCalculator";
+import HotelRates from "./pages/agent/HotelRates";
 import BankDetails from "./pages/agent/BankDetails";
 import Payments from "./pages/agent/Payments";
 import Ledger from "./pages/agent/Ledger";
@@ -54,12 +58,12 @@ function App() {
           {/* ═══ AGENT PANEL ═══ */}
           <Route path="/agent" element={<AgentRoute><AgentLayout /></AgentRoute>}>
             <Route index element={<AgentDashboard />} />
-            <Route path="groups" element={<ComingSoon title="Flight Groups" />} />
+            <Route path="groups" element={<FlightGroups />} />
             <Route path="bookings" element={<Bookings />} />
             <Route path="bookings/:id" element={<BookingDetail />} />
-            <Route path="packages" element={<ComingSoon title="Umrah Packages" />} />
-            <Route path="calculator" element={<ComingSoon title="Umrah Calculator" />} />
-            <Route path="hotel-rates" element={<ComingSoon title="Hotel Rates" />} />
+            <Route path="packages" element={<UmrahPackages />} />
+            <Route path="calculator" element={<UmrahCalculator />} />
+            <Route path="hotel-rates" element={<HotelRates />} />
             <Route path="bank-details" element={<BankDetails />} />
             <Route path="payments" element={<Payments />} />
             <Route path="ledger" element={<Ledger />} />
