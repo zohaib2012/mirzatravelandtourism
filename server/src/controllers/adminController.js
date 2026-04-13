@@ -369,6 +369,477 @@ export const createDeal = async (req, res) => {
   }
 };
 
+// Delete Airline
+export const deleteAirline = async (req, res) => {
+  try {
+    await prisma.airline.delete({ where: { id: parseInt(req.params.id) } });
+    res.json({ message: "Airline deleted" });
+  } catch {
+    res.status(400).json({ message: "Cannot delete - airline may have groups" });
+  }
+};
+
+// Delete Sector
+export const deleteSector = async (req, res) => {
+  try {
+    await prisma.sector.delete({ where: { id: parseInt(req.params.id) } });
+    res.json({ message: "Sector deleted" });
+  } catch {
+    res.status(400).json({ message: "Cannot delete - sector may have groups" });
+  }
+};
+
+// Get Hotels
+export const getHotels = async (req, res) => {
+  try {
+    const { city } = req.query;
+    const where = { isActive: true };
+    if (city) where.city = city;
+    const hotels = await prisma.hotel.findMany({ where, orderBy: { name: "asc" } });
+    res.json(hotels);
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get Visa Types
+export const getVisaTypes = async (req, res) => {
+  try {
+    const visaTypes = await prisma.visaType.findMany({ where: { isActive: true }, orderBy: { name: "asc" } });
+    res.json(visaTypes);
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Delete Visa Type
+export const deleteVisaType = async (req, res) => {
+  try {
+    await prisma.visaType.update({ where: { id: parseInt(req.params.id) }, data: { isActive: false } });
+    res.json({ message: "Visa type deleted" });
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get Transports
+export const getTransports = async (req, res) => {
+  try {
+    const transports = await prisma.transport.findMany({ where: { isActive: true }, orderBy: { name: "asc" } });
+    res.json(transports);
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Delete Transport
+export const deleteTransport = async (req, res) => {
+  try {
+    await prisma.transport.update({ where: { id: parseInt(req.params.id) }, data: { isActive: false } });
+    res.json({ message: "Transport deleted" });
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get all payments (admin)
+export const getAllPayments = async (req, res) => {
+  try {
+    const { status, page = 1, limit = 50 } = req.query;
+    const where = {};
+    if (status) where.status = status;
+    const payments = await prisma.payment.findMany({
+      where,
+      include: {
+        agent: { select: { agentCode: true, contactPerson: true, agencyName: true } },
+        bankAccount: true,
+      },
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * limit,
+      take: parseInt(limit),
+    });
+    res.json({ payments });
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Update payment status
+export const updatePaymentStatus = async (req, res) => {
+  try {
+    const { status, adminRemarks } = req.body;
+    const payment = await prisma.payment.findUnique({ where: { id: parseInt(req.params.id) } });
+    if (!payment) return res.status(404).json({ message: "Payment not found" });
+
+    const updated = await prisma.payment.update({
+      where: { id: parseInt(req.params.id) },
+      data: { status, adminRemarks },
+    });
+
+    // If posting payment, create ledger credit entry
+    if (status === "POSTED" && payment.status !== "POSTED") {
+      await prisma.ledgerEntry.create({
+        data: {
+          agentId: payment.agentId,
+          paymentId: payment.id,
+          description: `Payment Posted: ${payment.description || "Payment received"}`,
+          credit: payment.amount,
+          debit: 0,
+          type: "CREDIT",
+        },
+      });
+    }
+
+    res.json({ message: "Payment status updated", payment: updated });
+  } catch (err) {
+    console.error("Update payment status error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get Bank Accounts
+export const getBankAccounts = async (req, res) => {
+  try {
+    const accounts = await prisma.bankAccount.findMany({ where: { isActive: true }, orderBy: { bankName: "asc" } });
+    res.json(accounts);
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Delete Bank Account
+export const deleteBankAccount = async (req, res) => {
+  try {
+    await prisma.bankAccount.update({ where: { id: parseInt(req.params.id) }, data: { isActive: false } });
+    res.json({ message: "Bank account deactivated" });
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Delete Branch
+export const deleteOfficeBranch = async (req, res) => {
+  try {
+    await prisma.officeBranch.update({ where: { id: parseInt(req.params.id) }, data: { isActive: false } });
+    res.json({ message: "Branch deleted" });
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Update Authorization
+export const updateAuthorization = async (req, res) => {
+  try {
+    const auth = await prisma.authorization.update({
+      where: { id: parseInt(req.params.id) },
+      data: req.body,
+    });
+    res.json({ message: "Authorization updated", auth });
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Delete Authorization
+export const deleteAuthorization = async (req, res) => {
+  try {
+    await prisma.authorization.update({ where: { id: parseInt(req.params.id) }, data: { isActive: false } });
+    res.json({ message: "Authorization deleted" });
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Update Deal
+export const updateDeal = async (req, res) => {
+  try {
+    const deal = await prisma.deal.update({
+      where: { id: parseInt(req.params.id) },
+      data: req.body,
+    });
+    res.json({ message: "Deal updated", deal });
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Delete Deal
+export const deleteDeal = async (req, res) => {
+  try {
+    await prisma.deal.update({ where: { id: parseInt(req.params.id) }, data: { isActive: false } });
+    res.json({ message: "Deal deleted" });
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get All Bookings (admin)
+export const getAllBookings = async (req, res) => {
+  try {
+    const { status, bookingType, agentId, page = 1, limit = 50 } = req.query;
+    const where = {};
+    if (status) where.status = status;
+    if (bookingType) where.bookingType = bookingType;
+    if (agentId) where.agentId = parseInt(agentId);
+
+    const bookings = await prisma.booking.findMany({
+      where,
+      include: {
+        agent: { select: { agentCode: true, contactPerson: true, agencyName: true } },
+        group: { include: { airline: true, sector: true } },
+        package: { select: { packageName: true, departureDate: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * parseInt(limit),
+      take: parseInt(limit),
+    });
+    const total = await prisma.booking.count({ where });
+    res.json({ bookings, total });
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Update Booking Status (admin)
+export const updateBookingStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const booking = await prisma.booking.update({
+      where: { id: parseInt(req.params.id) },
+      data: { status },
+    });
+    res.json({ message: "Booking status updated", booking });
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Admin get Groups
+export const getAdminGroups = async (req, res) => {
+  try {
+    const { status, category, page = 1, limit = 50 } = req.query;
+    const where = {};
+    if (status) where.status = status;
+    if (category) where.category = category;
+    const groups = await prisma.flightGroup.findMany({
+      where,
+      include: { airline: true, sector: true, flightLegs: true, _count: { select: { bookings: true } } },
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * parseInt(limit),
+      take: parseInt(limit),
+    });
+    const total = await prisma.flightGroup.count({ where });
+    res.json({ groups, total });
+  } catch (err) {
+    console.error("Get groups error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Admin create Group (full group with flight legs)
+export const createGroup = async (req, res) => {
+  try {
+    const { flightLegs, ...groupData } = req.body;
+    if (groupData.departureDate) groupData.departureDate = new Date(groupData.departureDate);
+    if (groupData.returnDate) groupData.returnDate = new Date(groupData.returnDate);
+    if (groupData.airlineId) groupData.airlineId = parseInt(groupData.airlineId);
+    if (groupData.sectorId) groupData.sectorId = parseInt(groupData.sectorId);
+    if (groupData.totalSeats) groupData.totalSeats = parseInt(groupData.totalSeats);
+    if (groupData.availableSeats) groupData.availableSeats = parseInt(groupData.availableSeats);
+    if (groupData.adultPrice) groupData.adultPrice = parseFloat(groupData.adultPrice);
+    if (groupData.childPrice) groupData.childPrice = parseFloat(groupData.childPrice);
+    if (groupData.infantPrice) groupData.infantPrice = parseFloat(groupData.infantPrice);
+
+    const group = await prisma.flightGroup.create({
+      data: {
+        ...groupData,
+        flightLegs: flightLegs?.length > 0 ? {
+          create: flightLegs.map((leg) => ({
+            flightNumber: leg.flightNumber,
+            origin: leg.origin,
+            destination: leg.destination,
+            departureDate: new Date(leg.departureDate),
+            departureTime: leg.departureTime,
+            arrivalTime: leg.arrivalTime,
+            baggage: leg.baggage,
+          })),
+        } : undefined,
+      },
+      include: { airline: true, sector: true, flightLegs: true },
+    });
+    res.status(201).json({ message: "Group created", group });
+  } catch (err) {
+    console.error("Create group error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Admin update Group
+export const updateGroup = async (req, res) => {
+  try {
+    const { flightLegs, ...groupData } = req.body;
+    if (groupData.departureDate) groupData.departureDate = new Date(groupData.departureDate);
+    if (groupData.returnDate) groupData.returnDate = new Date(groupData.returnDate);
+    if (groupData.airlineId) groupData.airlineId = parseInt(groupData.airlineId);
+    if (groupData.sectorId) groupData.sectorId = parseInt(groupData.sectorId);
+    if (groupData.totalSeats) groupData.totalSeats = parseInt(groupData.totalSeats);
+    if (groupData.availableSeats) groupData.availableSeats = parseInt(groupData.availableSeats);
+    if (groupData.adultPrice) groupData.adultPrice = parseFloat(groupData.adultPrice);
+    if (groupData.childPrice) groupData.childPrice = parseFloat(groupData.childPrice);
+    if (groupData.infantPrice) groupData.infantPrice = parseFloat(groupData.infantPrice);
+
+    await prisma.$transaction(async (tx) => {
+      await tx.flightGroup.update({
+        where: { id: parseInt(req.params.id) },
+        data: groupData,
+      });
+      if (flightLegs) {
+        await tx.flightLeg.deleteMany({ where: { groupId: parseInt(req.params.id) } });
+        if (flightLegs.length > 0) {
+          await tx.flightLeg.createMany({
+            data: flightLegs.map((leg) => ({
+              groupId: parseInt(req.params.id),
+              flightNumber: leg.flightNumber,
+              origin: leg.origin,
+              destination: leg.destination,
+              departureDate: new Date(leg.departureDate),
+              departureTime: leg.departureTime,
+              arrivalTime: leg.arrivalTime,
+              baggage: leg.baggage,
+            })),
+          });
+        }
+      }
+    });
+    const group = await prisma.flightGroup.findUnique({
+      where: { id: parseInt(req.params.id) },
+      include: { airline: true, sector: true, flightLegs: true },
+    });
+    res.json({ message: "Group updated", group });
+  } catch (err) {
+    console.error("Update group error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Admin delete Group
+export const deleteGroup = async (req, res) => {
+  try {
+    await prisma.flightGroup.update({
+      where: { id: parseInt(req.params.id) },
+      data: { status: "INACTIVE" },
+    });
+    res.json({ message: "Group deactivated" });
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Admin get Packages
+export const getAdminPackages = async (req, res) => {
+  try {
+    const packages = await prisma.umrahPackage.findMany({
+      include: {
+        group: { include: { airline: true, sector: true } },
+        packageHotels: { include: { hotel: true } },
+        visaType: true,
+        transport: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    res.json({ packages });
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Admin create Package
+export const createPackage = async (req, res) => {
+  try {
+    const { packageHotels, ...data } = req.body;
+    if (data.departureDate) data.departureDate = new Date(data.departureDate);
+    if (data.returnDate) data.returnDate = new Date(data.returnDate);
+    if (data.groupId) data.groupId = parseInt(data.groupId);
+    if (data.visaTypeId) data.visaTypeId = parseInt(data.visaTypeId);
+    if (data.transportId) data.transportId = parseInt(data.transportId);
+
+    const pkg = await prisma.umrahPackage.create({
+      data: {
+        ...data,
+        packageHotels: packageHotels?.length > 0 ? {
+          create: packageHotels.map((ph) => ({
+            hotelId: parseInt(ph.hotelId),
+            city: ph.city,
+            nights: parseInt(ph.nights),
+            checkinDate: ph.checkinDate ? new Date(ph.checkinDate) : null,
+            checkoutDate: ph.checkoutDate ? new Date(ph.checkoutDate) : null,
+          })),
+        } : undefined,
+      },
+    });
+    res.status(201).json({ message: "Package created", package: pkg });
+  } catch (err) {
+    console.error("Create package error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Admin update Package
+export const updatePackage = async (req, res) => {
+  try {
+    const { packageHotels, ...data } = req.body;
+    if (data.departureDate) data.departureDate = new Date(data.departureDate);
+    if (data.returnDate) data.returnDate = new Date(data.returnDate);
+    if (data.groupId) data.groupId = parseInt(data.groupId);
+    if (data.visaTypeId) data.visaTypeId = parseInt(data.visaTypeId);
+    if (data.transportId) data.transportId = parseInt(data.transportId);
+
+    await prisma.umrahPackage.update({
+      where: { id: parseInt(req.params.id) },
+      data,
+    });
+    res.json({ message: "Package updated" });
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Admin delete Package
+export const deletePackage = async (req, res) => {
+  try {
+    await prisma.umrahPackage.update({
+      where: { id: parseInt(req.params.id) },
+      data: { isActive: false },
+    });
+    res.json({ message: "Package deactivated" });
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Agent Ledger (admin view)
+export const getAgentLedger = async (req, res) => {
+  try {
+    const { agentId } = req.params;
+    const ledger = await prisma.ledgerEntry.findMany({
+      where: { agentId: parseInt(agentId) },
+      orderBy: { createdAt: "asc" },
+    });
+    let balance = 0;
+    const entries = ledger.map((e) => {
+      balance += Number(e.debit) - Number(e.credit);
+      return { ...e, balance };
+    });
+    const agent = await prisma.user.findUnique({
+      where: { id: parseInt(agentId) },
+      select: { agentCode: true, agencyName: true, contactPerson: true },
+    });
+    res.json({ entries, agent, currentBalance: balance });
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 // Company Settings
 export const getCompanySettings = async (req, res) => {
   try {

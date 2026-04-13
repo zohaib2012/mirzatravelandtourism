@@ -34,6 +34,21 @@ import ChangePassword from "./pages/agent/ChangePassword";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard";
+import Agents from "./pages/admin/Agents";
+import Airlines from "./pages/admin/Airlines";
+import Sectors from "./pages/admin/Sectors";
+import AdminGroups from "./pages/admin/AdminGroups";
+import AdminBookings from "./pages/admin/AdminBookings";
+import Hotels from "./pages/admin/Hotels";
+import VisaTypes from "./pages/admin/VisaTypes";
+import Transport from "./pages/admin/Transport";
+import PaymentVerification from "./pages/admin/PaymentVerification";
+import BankAccounts from "./pages/admin/BankAccounts";
+import AgentLedgers from "./pages/admin/AgentLedgers";
+import OfficeBranches from "./pages/admin/OfficeBranches";
+import Authorizations from "./pages/admin/Authorizations";
+import Deals from "./pages/admin/Deals";
+import Settings from "./pages/admin/Settings";
 
 // Placeholder
 import ComingSoon from "./pages/ComingSoon";
@@ -74,23 +89,23 @@ function App() {
           {/* ═══ ADMIN PANEL ═══ */}
           <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
             <Route index element={<AdminDashboard />} />
-            <Route path="agents" element={<ComingSoon title="Agent Management" />} />
-            <Route path="airlines" element={<ComingSoon title="Airlines" />} />
-            <Route path="sectors" element={<ComingSoon title="Sectors / Routes" />} />
-            <Route path="groups" element={<ComingSoon title="Flight Groups" />} />
-            <Route path="bookings" element={<ComingSoon title="All Bookings" />} />
+            <Route path="agents" element={<Agents />} />
+            <Route path="airlines" element={<Airlines />} />
+            <Route path="sectors" element={<Sectors />} />
+            <Route path="groups" element={<AdminGroups />} />
+            <Route path="bookings" element={<AdminBookings />} />
             <Route path="packages" element={<ComingSoon title="Umrah Packages" />} />
-            <Route path="hotels" element={<ComingSoon title="Hotels" />} />
-            <Route path="visa-types" element={<ComingSoon title="Visa Types" />} />
-            <Route path="transport" element={<ComingSoon title="Transport" />} />
-            <Route path="payments" element={<ComingSoon title="Payment Verification" />} />
-            <Route path="bank-accounts" element={<ComingSoon title="Bank Accounts" />} />
-            <Route path="ledger" element={<ComingSoon title="Agent Ledgers" />} />
+            <Route path="hotels" element={<Hotels />} />
+            <Route path="visa-types" element={<VisaTypes />} />
+            <Route path="transport" element={<Transport />} />
+            <Route path="payments" element={<PaymentVerification />} />
+            <Route path="bank-accounts" element={<BankAccounts />} />
+            <Route path="ledger" element={<AgentLedgers />} />
             <Route path="reports" element={<ComingSoon title="Reports" />} />
-            <Route path="branches" element={<ComingSoon title="Office Branches" />} />
-            <Route path="authorizations" element={<ComingSoon title="Authorizations" />} />
-            <Route path="deals" element={<ComingSoon title="Deals & Offers" />} />
-            <Route path="settings" element={<ComingSoon title="Settings" />} />
+            <Route path="branches" element={<OfficeBranches />} />
+            <Route path="authorizations" element={<Authorizations />} />
+            <Route path="deals" element={<Deals />} />
+            <Route path="settings" element={<Settings />} />
           </Route>
 
           {/* 404 */}
