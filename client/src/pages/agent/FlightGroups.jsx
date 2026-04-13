@@ -93,15 +93,27 @@ const FlightGroups = () => {
   };
 
   const copyFlightDetails = (group) => {
-    let text = `${group.airline?.name} | ${group.sector?.routeDisplay}\n`;
-    text += `Departure: ${format(new Date(group.departureDate), "dd MMM yyyy")}\n`;
+    const line = "─".repeat(35);
+    let text = `✈ *MIRZA TRAVEL & TOURISM*\n${line}\n`;
+    text += `*${group.airline?.name}* | ${group.sector?.routeDisplay}\n`;
+    text += `📅 Departure: ${format(new Date(group.departureDate), "EEE, dd MMM yyyy")}\n`;
+    text += `${line}\n*FLIGHT DETAILS:*\n`;
     group.flightLegs?.forEach((leg, i) => {
-      text += `${i + 1}) ${leg.flightNumber} ${format(new Date(leg.departureDate), "ddMMM")} ${leg.origin}-${leg.destination} ${leg.departureTime || ""} ${leg.arrivalTime || ""} ${leg.baggage || ""}\n`;
+      text += `${i + 1}) *${leg.flightNumber}*  ${format(new Date(leg.departureDate), "ddMMM")}`;
+      text += `  ${leg.origin} → ${leg.destination}`;
+      if (leg.departureTime) text += `  Dep: ${leg.departureTime}`;
+      if (leg.arrivalTime) text += `  Arr: ${leg.arrivalTime}`;
+      if (leg.baggage) text += `  Baggage: ${leg.baggage}`;
+      text += "\n";
     });
-    text += `Seats: ${group.availableSeats}/${group.totalSeats}\n`;
-    text += `Price: PKR ${Number(group.adultPrice).toLocaleString()}`;
+    text += `${line}\n`;
+    text += `💺 Available Seats: *${group.availableSeats}*\n`;
+    text += `💰 Adult Price: *PKR ${Number(group.adultPrice).toLocaleString()}*\n`;
+    if (group.childPrice) text += `💰 Child Price: *PKR ${Number(group.childPrice).toLocaleString()}*\n`;
+    if (group.infantPrice) text += `💰 Infant Price: *PKR ${Number(group.infantPrice).toLocaleString()}*\n`;
+    text += `${line}\n📞 Helpline: +92 3000381533`;
     navigator.clipboard.writeText(text);
-    toast.success("Flight details copied!");
+    toast.success("Flight details copied to clipboard!");
   };
 
   const removeAllFilters = () => {

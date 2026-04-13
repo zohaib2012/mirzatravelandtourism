@@ -11,6 +11,7 @@ import packageRoutes from "./routes/packageRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import publicRoutes from "./routes/publicRoutes.js";
+import { startAutoCancelScheduler, runAutoCancel } from "./services/autoCancelService.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -41,6 +42,16 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
 });
 
+// Cron endpoint - callable by Vercel cron or external scheduler
+app.post("/api/cron/auto-cancel", async (req, res) => {
+  const secret = req.headers["x-cron-secret"];
+  if (process.env.CRON_SECRET && secret !== process.env.CRON_SECRET) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  const cancelled = await runAutoCancel();
+  res.json({ success: true, cancelled });
+});
+
 app.use((err, req, res, next) => {
   console.error("Error:", err.message);
   if (err.name === "MulterError") {
@@ -51,4 +62,8 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  // Start auto-cancel scheduler (persistent servers only - not Vercel)
+  if (process.env.NODE_ENV !== "production") {
+    startAutoCancelScheduler();
+  }
 });

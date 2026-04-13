@@ -46,9 +46,9 @@ const BookNowModal = ({ group, onClose, onSuccess }) => {
 
     setSubmitting(true);
     try {
-      const { data } = await bookingAPI.create({
-        groupId: group.id,
-        bookingType: "AIRLINE",
+      const isPackage = group.bookingType === "PACKAGE";
+      const payload = {
+        bookingType: isPackage ? "PACKAGE" : "AIRLINE",
         adultsCount: adults,
         childrenCount: children,
         infantsCount: infants,
@@ -57,7 +57,14 @@ const BookNowModal = ({ group, onClose, onSuccess }) => {
           type: p.type,
           dob: p.dob || null,
         })),
-      });
+      };
+      if (isPackage) {
+        payload.packageId = group.packageId;
+        payload.roomType = group.roomType;
+      } else {
+        payload.groupId = group.id;
+      }
+      const { data } = await bookingAPI.create(payload);
       toast.success("Booking created successfully!");
       onSuccess(data.booking);
     } catch (err) {
@@ -75,7 +82,10 @@ const BookNowModal = ({ group, onClose, onSuccess }) => {
           <div>
             <h3 className="font-bold text-lg">Book Seats</h3>
             <p className="text-xs text-blue-200 mt-1">
-              Group: <b>{group.groupName}</b> | Available: <b>{group.availableSeats}</b> | Sector: <b>{group.sector?.routeDisplay}</b>
+              {group.bookingType === "PACKAGE"
+                ? <>Package: <b>{group.packageName}</b> | Room: <b>{group.roomType}</b></>
+                : <>Group: <b>{group.groupName}</b> | Available: <b>{group.availableSeats}</b> | Sector: <b>{group.sector?.routeDisplay}</b></>
+              }
             </p>
           </div>
           <button onClick={onClose} className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30">

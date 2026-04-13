@@ -1,14 +1,24 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { bookingAPI } from "../../services/api";
 import { format, differenceInSeconds } from "date-fns";
 import toast from "react-hot-toast";
+import VoucherPrint from "../../components/agent/VoucherPrint";
+import Voucher2Print from "../../components/agent/Voucher2Print";
+import TicketPrint from "../../components/agent/TicketPrint";
 
 const Bookings = () => {
   const [searchParams] = useSearchParams();
   const bookingType = searchParams.get("type") || "";
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [printBooking, setPrintBooking] = useState(null);
+  const [printType, setPrintType] = useState(null); // "ticket" | "voucher1" | "voucher2"
+
+  const handlePrint = (booking, type) => {
+    setPrintBooking(booking);
+    setPrintType(type);
+  };
   const [filters, setFilters] = useState({
     dateFrom: format(new Date(new Date().setDate(1)), "yyyy-MM-dd"),
     dateTo: format(new Date(), "yyyy-MM-dd"),
@@ -210,22 +220,22 @@ const Bookings = () => {
                   </td>
                   <td className="px-3 py-3">
                     {getStatusBadge(b.status)}
-                    {bookingType === "PACKAGE" && b.status !== "CANCELLED" && (
+                    {b.bookingType === "PACKAGE" && b.status !== "CANCELLED" && (
                       <div className="mt-1 space-y-1">
-                        <button className="block w-full text-xs px-2 py-1 bg-blue-500 text-white rounded text-center">Voucher</button>
-                        <button className="block w-full text-xs px-2 py-1 bg-red-500 text-white rounded text-center">Print Ticket</button>
+                        <button onClick={() => handlePrint(b, "voucher1")} className="block w-full text-xs px-2 py-1 bg-blue-500 text-white rounded text-center hover:bg-blue-600">📋 Voucher</button>
+                        <button onClick={() => handlePrint(b, "voucher2")} className="block w-full text-xs px-2 py-1 bg-yellow-500 text-white rounded text-center hover:bg-yellow-600">📄 Voucher 2</button>
+                      </div>
+                    )}
+                    {b.bookingType === "AIRLINE" && b.status !== "CANCELLED" && (
+                      <div className="mt-1">
+                        <button onClick={() => handlePrint(b, "ticket")} className="block w-full text-xs px-2 py-1 bg-red-500 text-white rounded text-center hover:bg-red-600">🎫 Print Ticket</button>
                       </div>
                     )}
                   </td>
                   <td className="px-3 py-3">
                     <Link to={`/agent/bookings/${b.id}`} className="px-3 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600">
-                      {bookingType === "PACKAGE" ? "Details" : "View"}
+                      {b.bookingType === "PACKAGE" ? "Details" : "View"}
                     </Link>
-                    {bookingType === "PACKAGE" && (
-                      <button className="mt-1 px-3 py-1 bg-yellow-500 text-white text-xs rounded flex items-center gap-1">
-                        <span className="fa fa-print" /> Voucher 2
-                      </button>
-                    )}
                   </td>
                 </tr>
               ))}
@@ -243,41 +253,80 @@ const Bookings = () => {
           </div>
         </div>
       </div>
+
+      {/* Print Components */}
+      {printBooking && printType === "ticket" && (
+        <TicketPrint booking={printBooking} onClose={() => { setPrintBooking(null); setPrintType(null); }} />
+      )}
+      {printBooking && printType === "voucher1" && (
+        <VoucherPrint booking={printBooking} onClose={() => { setPrintBooking(null); setPrintType(null); }} />
+      )}
+      {printBooking && printType === "voucher2" && (
+        <Voucher2Print booking={printBooking} onClose={() => { setPrintBooking(null); setPrintType(null); }} />
+      )}
     </div>
   );
 };
 
-// Countdown Timer Component (like FlipClock)
+// FlipClock style Countdown Timer
 const CountdownTimer = ({ expiry }) => {
-  const [timeLeft, setTimeLeft] = useState("");
+  const [time, setTime] = useState({ h: 0, m: 0, s: 0 });
   const [expired, setExpired] = useState(false);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      const now = new Date();
-      const exp = new Date(expiry);
-      const diff = differenceInSeconds(exp, now);
-
+    const update = () => {
+      const diff = differenceInSeconds(new Date(expiry), new Date());
       if (diff <= 0) {
         setExpired(true);
-        setTimeLeft("Expired");
-        clearInterval(timer);
+        setTime({ h: 0, m: 0, s: 0 });
       } else {
-        const h = Math.floor(diff / 3600);
-        const m = Math.floor((diff % 3600) / 60);
-        const s = diff % 60;
-        setTimeLeft(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`);
+        setTime({
+          h: Math.floor(diff / 3600),
+          m: Math.floor((diff % 3600) / 60),
+          s: diff % 60,
+        });
       }
-    }, 1000);
-
+    };
+    update();
+    const timer = setInterval(update, 1000);
     return () => clearInterval(timer);
   }, [expiry]);
 
+  if (expired) {
+    return (
+      <div className="mt-1">
+        <span className="text-xs font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded">
+          ⏰ EXPIRED
+        </span>
+      </div>
+    );
+  }
+
+  const pad = (n) => n.toString().padStart(2, "0");
+  const isUrgent = time.h === 0 && time.m < 30;
+
   return (
     <div className="mt-1">
-      <span className="text-xs text-red-600 font-bold">Booking Expires In:</span>
-      <div className={`text-sm font-mono font-bold ${expired ? "text-red-500" : "text-green-600"}`}>
-        {timeLeft}
+      <span className="text-xs text-gray-500">Expires in:</span>
+      <div className="flex items-center gap-0.5 mt-0.5">
+        {[
+          { val: pad(time.h), label: "H" },
+          { val: pad(time.m), label: "M" },
+          { val: pad(time.s), label: "S" },
+        ].map((unit, i) => (
+          <div key={i} className="flex items-end gap-0.5">
+            {i > 0 && <span className={`text-sm font-bold mb-1 ${isUrgent ? "text-red-500" : "text-gray-400"}`}>:</span>}
+            <div className="text-center">
+              <div
+                className={`w-8 h-7 flex items-center justify-center rounded text-xs font-mono font-bold text-white shadow-sm
+                  ${isUrgent ? "bg-red-600" : "bg-gray-700"}`}
+              >
+                {unit.val}
+              </div>
+              <div className="text-gray-400" style={{ fontSize: "9px" }}>{unit.label}</div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

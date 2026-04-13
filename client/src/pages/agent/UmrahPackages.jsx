@@ -1,18 +1,22 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { packageAPI } from "../../services/api";
 import { format } from "date-fns";
 import { FaPlane, FaPlaneDeparture, FaPlaneArrival, FaKaaba, FaMosque, FaBus, FaChair } from "react-icons/fa";
 import toast from "react-hot-toast";
+import BookNowModal from "../../components/agent/BookNowModal";
+import BookingSuccessModal from "../../components/agent/BookingSuccessModal";
 
 const UmrahPackages = () => {
-  const navigate = useNavigate();
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [airlineFilters, setAirlineFilters] = useState([]);
   const [sectorFilters, setSectorFilters] = useState([]);
   const [selectedAirlines, setSelectedAirlines] = useState([]);
   const [selectedSectors, setSelectedSectors] = useState([]);
+  const [bookModalOpen, setBookModalOpen] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
+  const [lastBooking, setLastBooking] = useState(null);
 
   useEffect(() => {
     loadPackages();
@@ -53,11 +57,31 @@ const UmrahPackages = () => {
     return true;
   });
 
+  const handleBookingSuccess = (booking) => {
+    setLastBooking(booking);
+    setBookModalOpen(false);
+    setSuccessModalOpen(true);
+    loadPackages();
+  };
+
   const selectPackage = (pkg, roomType, price) => {
     if (!price) return toast.error("This room type is not available");
-    navigate(`/agent/bookings?packageBook=${pkg.id}&room=${roomType}&price=${price}`);
-    // For now just show toast - actual booking flow can be added
-    toast.success(`Selected ${roomType} room - PKR ${Number(price).toLocaleString()}`);
+    // Build a group-like object for the BookNowModal (package booking)
+    const groupForModal = {
+      ...pkg.group,
+      id: pkg.group?.id,
+      packageId: pkg.id,
+      packageName: pkg.packageName,
+      bookingType: "PACKAGE",
+      roomType,
+      adultPrice: price,
+      childPrice: price,
+      infantPrice: 0,
+      availableSeats: 999,
+      totalSeats: 999,
+    };
+    setSelectedGroup(groupForModal);
+    setBookModalOpen(true);
   };
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" /></div>;
@@ -228,6 +252,21 @@ const UmrahPackages = () => {
           </div>
         ))}
       </div>
+
+      {/* Modals */}
+      {bookModalOpen && selectedGroup && (
+        <BookNowModal
+          group={selectedGroup}
+          onClose={() => setBookModalOpen(false)}
+          onSuccess={handleBookingSuccess}
+        />
+      )}
+      {successModalOpen && lastBooking && (
+        <BookingSuccessModal
+          booking={lastBooking}
+          onClose={() => setSuccessModalOpen(false)}
+        />
+      )}
     </div>
   );
 };

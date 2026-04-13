@@ -2,11 +2,17 @@ import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { bookingAPI } from "../../services/api";
 import { format } from "date-fns";
+import TicketPrint from "../../components/agent/TicketPrint";
+import VoucherPrint from "../../components/agent/VoucherPrint";
+import Voucher2Print from "../../components/agent/Voucher2Print";
 
 const BookingDetail = () => {
   const { id } = useParams();
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showTicket, setShowTicket] = useState(false);
+  const [showVoucher, setShowVoucher] = useState(false);
+  const [showVoucher2, setShowVoucher2] = useState(false);
 
   useEffect(() => {
     bookingAPI.getById(id)
@@ -192,16 +198,31 @@ const BookingDetail = () => {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-3">
+      <div className="flex gap-3 flex-wrap">
         <Link to="/agent/bookings" className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
           Back to Bookings
         </Link>
-        {booking.status === "CONFIRMED" && (
-          <button onClick={() => window.print()} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 flex items-center gap-2">
-            <i className="fas fa-ticket-alt" /> Print Ticket
+        {booking.bookingType === "AIRLINE" && booking.status !== "CANCELLED" && (
+          <button onClick={() => setShowTicket(true)} className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 flex items-center gap-2">
+            🎫 Print Ticket
           </button>
         )}
+        {booking.bookingType === "PACKAGE" && booking.status !== "CANCELLED" && (
+          <>
+            <button onClick={() => setShowVoucher(true)} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2">
+              📋 Voucher 1
+            </button>
+            <button onClick={() => setShowVoucher2(true)} className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 flex items-center gap-2">
+              📄 Voucher 2
+            </button>
+          </>
+        )}
       </div>
+
+      {/* Print Components */}
+      {showTicket && <TicketPrint booking={booking} onClose={() => setShowTicket(false)} />}
+      {showVoucher && <VoucherPrint booking={booking} onClose={() => setShowVoucher(false)} />}
+      {showVoucher2 && <Voucher2Print booking={booking} onClose={() => setShowVoucher2(false)} />}
     </div>
   );
 };
