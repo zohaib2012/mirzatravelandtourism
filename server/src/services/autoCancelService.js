@@ -1,4 +1,4 @@
-import prisma from "../config/database.js";
+import prisma from "../config/db.js";
 
 /**
  * Auto-cancel bookings whose expiryTime has passed and are still ON_REQUEST
