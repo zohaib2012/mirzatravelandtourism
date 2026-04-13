@@ -1,7 +1,7 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const prisma = require("../config/db");
-const { generateAgentCode } = require("../utils/helpers");
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import prisma from "../config/db.js";
+import { generateAgentCode } from "../utils/helpers.js";
 
 const generateTokens = (userId, role) => {
   const accessToken = jwt.sign({ userId, role }, process.env.JWT_SECRET, {
@@ -13,7 +13,7 @@ const generateTokens = (userId, role) => {
   return { accessToken, refreshToken };
 };
 
-exports.register = async (req, res) => {
+export const register = async (req, res) => {
   try {
     const { agencyName, contactPerson, email, password, phone, city, country } = req.body;
 
@@ -57,7 +57,7 @@ exports.register = async (req, res) => {
   }
 };
 
-exports.login = async (req, res) => {
+export const login = async (req, res) => {
   try {
     const { agentCode, email, password } = req.body;
 
@@ -117,7 +117,7 @@ exports.login = async (req, res) => {
   }
 };
 
-exports.refreshToken = async (req, res) => {
+export const refreshToken = async (req, res) => {
   try {
     const { refreshToken } = req.body;
     if (!refreshToken) {
@@ -133,7 +133,7 @@ exports.refreshToken = async (req, res) => {
   }
 };
 
-exports.changePassword = async (req, res) => {
+export const changePassword = async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
 
@@ -156,7 +156,7 @@ exports.changePassword = async (req, res) => {
   }
 };
 
-exports.getProfile = async (req, res) => {
+export const getProfile = async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
@@ -172,7 +172,7 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-exports.updateProfile = async (req, res) => {
+export const updateProfile = async (req, res) => {
   try {
     const { contactPerson, phone, city, country } = req.body;
 

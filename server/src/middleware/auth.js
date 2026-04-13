@@ -1,7 +1,7 @@
-const jwt = require("jsonwebtoken");
-const prisma = require("../config/db");
+import jwt from "jsonwebtoken";
+import prisma from "../config/db.js";
 
-const authenticate = async (req, res, next) => {
+export const authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -33,18 +33,16 @@ const authenticate = async (req, res, next) => {
   }
 };
 
-const authorizeAdmin = (req, res, next) => {
+export const authorizeAdmin = (req, res, next) => {
   if (req.user.role !== "ADMIN") {
     return res.status(403).json({ message: "Admin access required" });
   }
   next();
 };
 
-const authorizeAgent = (req, res, next) => {
+export const authorizeAgent = (req, res, next) => {
   if (req.user.role !== "AGENT") {
     return res.status(403).json({ message: "Agent access required" });
   }
   next();
 };
-
-module.exports = { authenticate, authorizeAdmin, authorizeAgent };

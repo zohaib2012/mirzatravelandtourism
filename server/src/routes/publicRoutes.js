@@ -1,10 +1,11 @@
-const router = require("express").Router();
-const admin = require("../controllers/adminController");
+import { Router } from "express";
+import * as admin from "../controllers/adminController.js";
 
-// Public routes (no auth needed) - for landing page data
+const router = Router();
+
 router.get("/branches", admin.getOfficeBranches);
 router.get("/authorizations", admin.getAuthorizations);
 router.get("/deals", admin.getDeals);
 router.get("/settings", admin.getCompanySettings);
 
-module.exports = router;
+export default router;

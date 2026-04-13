@@ -1,6 +1,7 @@
 {
   "name": "mirza-travel-server",
   "version": "1.0.0",
+  "type": "module",
   "description": "Mirza Travel & Tourism - Backend API",
   "main": "src/index.js",
   "scripts": {

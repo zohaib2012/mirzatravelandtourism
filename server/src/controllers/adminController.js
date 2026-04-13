@@ -1,7 +1,7 @@
-const prisma = require("../config/db");
+import prisma from "../config/db.js";
 
 // Dashboard stats
-exports.getDashboardStats = async (req, res) => {
+export const getDashboardStats = async (req, res) => {
   try {
     const [totalAgents, pendingAgents, totalBookings, activeGroups,
       confirmedBookings, cancelledBookings, totalRevenue] = await Promise.all([
@@ -37,7 +37,7 @@ exports.getDashboardStats = async (req, res) => {
 };
 
 // Get all agents
-exports.getAgents = async (req, res) => {
+export const getAgents = async (req, res) => {
   try {
     const { status, search, page = 1, limit = 50 } = req.query;
 
@@ -75,7 +75,7 @@ exports.getAgents = async (req, res) => {
 };
 
 // Update agent status
-exports.updateAgentStatus = async (req, res) => {
+export const updateAgentStatus = async (req, res) => {
   try {
     const { status } = req.body;
     const user = await prisma.user.update({
@@ -90,7 +90,7 @@ exports.updateAgentStatus = async (req, res) => {
 };
 
 // CRUD Airlines
-exports.getAirlines = async (req, res) => {
+export const getAirlines = async (req, res) => {
   try {
     const airlines = await prisma.airline.findMany({ orderBy: { name: "asc" } });
     res.json(airlines);
@@ -99,7 +99,7 @@ exports.getAirlines = async (req, res) => {
   }
 };
 
-exports.createAirline = async (req, res) => {
+export const createAirline = async (req, res) => {
   try {
     const airline = await prisma.airline.create({ data: req.body });
     res.status(201).json({ message: "Airline created", airline });
@@ -108,7 +108,7 @@ exports.createAirline = async (req, res) => {
   }
 };
 
-exports.updateAirline = async (req, res) => {
+export const updateAirline = async (req, res) => {
   try {
     const airline = await prisma.airline.update({
       where: { id: parseInt(req.params.id) },
@@ -121,7 +121,7 @@ exports.updateAirline = async (req, res) => {
 };
 
 // CRUD Sectors
-exports.getSectors = async (req, res) => {
+export const getSectors = async (req, res) => {
   try {
     const sectors = await prisma.sector.findMany({ orderBy: { routeDisplay: "asc" } });
     res.json(sectors);
@@ -130,7 +130,7 @@ exports.getSectors = async (req, res) => {
   }
 };
 
-exports.createSector = async (req, res) => {
+export const createSector = async (req, res) => {
   try {
     const sector = await prisma.sector.create({ data: req.body });
     res.status(201).json({ message: "Sector created", sector });
@@ -139,7 +139,7 @@ exports.createSector = async (req, res) => {
   }
 };
 
-exports.updateSector = async (req, res) => {
+export const updateSector = async (req, res) => {
   try {
     const sector = await prisma.sector.update({
       where: { id: parseInt(req.params.id) },
@@ -152,7 +152,7 @@ exports.updateSector = async (req, res) => {
 };
 
 // CRUD Hotels
-exports.createHotel = async (req, res) => {
+export const createHotel = async (req, res) => {
   try {
     const data = { ...req.body };
     if (data.distance) data.distance = parseFloat(data.distance);
@@ -173,7 +173,7 @@ exports.createHotel = async (req, res) => {
   }
 };
 
-exports.updateHotel = async (req, res) => {
+export const updateHotel = async (req, res) => {
   try {
     const data = { ...req.body };
     if (data.distance) data.distance = parseFloat(data.distance);
@@ -196,7 +196,7 @@ exports.updateHotel = async (req, res) => {
   }
 };
 
-exports.deleteHotel = async (req, res) => {
+export const deleteHotel = async (req, res) => {
   try {
     await prisma.hotel.update({
       where: { id: parseInt(req.params.id) },
@@ -209,7 +209,7 @@ exports.deleteHotel = async (req, res) => {
 };
 
 // CRUD Visa Types
-exports.createVisaType = async (req, res) => {
+export const createVisaType = async (req, res) => {
   try {
     const data = { ...req.body };
     if (data.adultBuyRate) data.adultBuyRate = parseFloat(data.adultBuyRate);
@@ -224,7 +224,7 @@ exports.createVisaType = async (req, res) => {
   }
 };
 
-exports.updateVisaType = async (req, res) => {
+export const updateVisaType = async (req, res) => {
   try {
     const data = { ...req.body };
     if (data.adultBuyRate) data.adultBuyRate = parseFloat(data.adultBuyRate);
@@ -243,7 +243,7 @@ exports.updateVisaType = async (req, res) => {
 };
 
 // CRUD Transport
-exports.createTransport = async (req, res) => {
+export const createTransport = async (req, res) => {
   try {
     const data = { ...req.body };
     if (data.buyRate) data.buyRate = parseFloat(data.buyRate);
@@ -256,7 +256,7 @@ exports.createTransport = async (req, res) => {
   }
 };
 
-exports.updateTransport = async (req, res) => {
+export const updateTransport = async (req, res) => {
   try {
     const data = { ...req.body };
     if (data.buyRate) data.buyRate = parseFloat(data.buyRate);
@@ -273,7 +273,7 @@ exports.updateTransport = async (req, res) => {
 };
 
 // CRUD Bank Accounts
-exports.createBankAccount = async (req, res) => {
+export const createBankAccount = async (req, res) => {
   try {
     const account = await prisma.bankAccount.create({ data: req.body });
     res.status(201).json({ message: "Bank account created", account });
@@ -282,7 +282,7 @@ exports.createBankAccount = async (req, res) => {
   }
 };
 
-exports.updateBankAccount = async (req, res) => {
+export const updateBankAccount = async (req, res) => {
   try {
     const account = await prisma.bankAccount.update({
       where: { id: parseInt(req.params.id) },
@@ -295,7 +295,7 @@ exports.updateBankAccount = async (req, res) => {
 };
 
 // CRUD Office Branches
-exports.getOfficeBranches = async (req, res) => {
+export const getOfficeBranches = async (req, res) => {
   try {
     const branches = await prisma.officeBranch.findMany({
       where: { isActive: true },
@@ -307,7 +307,7 @@ exports.getOfficeBranches = async (req, res) => {
   }
 };
 
-exports.createOfficeBranch = async (req, res) => {
+export const createOfficeBranch = async (req, res) => {
   try {
     const branch = await prisma.officeBranch.create({ data: req.body });
     res.status(201).json({ message: "Branch created", branch });
@@ -316,7 +316,7 @@ exports.createOfficeBranch = async (req, res) => {
   }
 };
 
-exports.updateOfficeBranch = async (req, res) => {
+export const updateOfficeBranch = async (req, res) => {
   try {
     const branch = await prisma.officeBranch.update({
       where: { id: parseInt(req.params.id) },
@@ -329,7 +329,7 @@ exports.updateOfficeBranch = async (req, res) => {
 };
 
 // CRUD Authorizations
-exports.getAuthorizations = async (req, res) => {
+export const getAuthorizations = async (req, res) => {
   try {
     const auths = await prisma.authorization.findMany({ where: { isActive: true } });
     res.json(auths);
@@ -338,7 +338,7 @@ exports.getAuthorizations = async (req, res) => {
   }
 };
 
-exports.createAuthorization = async (req, res) => {
+export const createAuthorization = async (req, res) => {
   try {
     const auth = await prisma.authorization.create({ data: req.body });
     res.status(201).json({ message: "Authorization created", auth });
@@ -348,7 +348,7 @@ exports.createAuthorization = async (req, res) => {
 };
 
 // CRUD Deals
-exports.getDeals = async (req, res) => {
+export const getDeals = async (req, res) => {
   try {
     const deals = await prisma.deal.findMany({
       where: { isActive: true },
@@ -360,7 +360,7 @@ exports.getDeals = async (req, res) => {
   }
 };
 
-exports.createDeal = async (req, res) => {
+export const createDeal = async (req, res) => {
   try {
     const deal = await prisma.deal.create({ data: req.body });
     res.status(201).json({ message: "Deal created", deal });
@@ -370,7 +370,7 @@ exports.createDeal = async (req, res) => {
 };
 
 // Company Settings
-exports.getCompanySettings = async (req, res) => {
+export const getCompanySettings = async (req, res) => {
   try {
     const settings = await prisma.companySetting.findFirst();
     res.json(settings);
@@ -379,7 +379,7 @@ exports.getCompanySettings = async (req, res) => {
   }
 };
 
-exports.updateCompanySettings = async (req, res) => {
+export const updateCompanySettings = async (req, res) => {
   try {
     let settings = await prisma.companySetting.findFirst();
     if (settings) {

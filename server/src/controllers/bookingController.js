@@ -1,8 +1,8 @@
-const prisma = require("../config/db");
-const { generateBookingNo } = require("../utils/helpers");
+import prisma from "../config/db.js";
+import { generateBookingNo } from "../utils/helpers.js";
 
 // Create booking
-exports.createBooking = async (req, res) => {
+export const createBooking = async (req, res) => {
   try {
     const { groupId, packageId, bookingType, roomType, adultsCount, childrenCount,
       infantsCount, passengers } = req.body;
@@ -129,7 +129,7 @@ exports.createBooking = async (req, res) => {
 };
 
 // Get agent's bookings
-exports.getMyBookings = async (req, res) => {
+export const getMyBookings = async (req, res) => {
   try {
     const { dateFrom, dateTo, status, bookingType, page = 1, limit = 50 } = req.query;
 
@@ -164,7 +164,7 @@ exports.getMyBookings = async (req, res) => {
 };
 
 // Get booking details
-exports.getBookingById = async (req, res) => {
+export const getBookingById = async (req, res) => {
   try {
     const booking = await prisma.booking.findUnique({
       where: { id: parseInt(req.params.id) },
@@ -190,7 +190,7 @@ exports.getBookingById = async (req, res) => {
 };
 
 // Admin: Get all bookings
-exports.getAllBookings = async (req, res) => {
+export const getAllBookings = async (req, res) => {
   try {
     const { dateFrom, dateTo, status, bookingType, agentId, page = 1, limit = 50 } = req.query;
 
@@ -226,7 +226,7 @@ exports.getAllBookings = async (req, res) => {
 };
 
 // Admin: Update booking status
-exports.updateBookingStatus = async (req, res) => {
+export const updateBookingStatus = async (req, res) => {
   try {
     const { status } = req.body;
     const bookingId = parseInt(req.params.id);

@@ -1,7 +1,7 @@
-const prisma = require("../config/db");
+import prisma from "../config/db.js";
 
 // Get all active flight groups with filters
-exports.getGroups = async (req, res) => {
+export const getGroups = async (req, res) => {
   try {
     const { category, airline, sector, search, page = 1, limit = 50 } = req.query;
     const skip = (page - 1) * limit;
@@ -41,7 +41,7 @@ exports.getGroups = async (req, res) => {
 };
 
 // Get single group with all details
-exports.getGroupById = async (req, res) => {
+export const getGroupById = async (req, res) => {
   try {
     const group = await prisma.flightGroup.findUnique({
       where: { id: parseInt(req.params.id) },
@@ -60,7 +60,7 @@ exports.getGroupById = async (req, res) => {
 };
 
 // Get filter options (airlines and sectors with active groups)
-exports.getFilterOptions = async (req, res) => {
+export const getFilterOptions = async (req, res) => {
   try {
     const { category } = req.query;
     const where = { status: "ACTIVE" };
@@ -86,7 +86,7 @@ exports.getFilterOptions = async (req, res) => {
 };
 
 // Admin: Create group
-exports.createGroup = async (req, res) => {
+export const createGroup = async (req, res) => {
   try {
     const { groupName, category, airlineId, sectorId, totalSeats, departureDate,
       returnDate, numDays, adultPrice, childPrice, infantPrice, currency, pnr1, pnr2, flightLegs } = req.body;
@@ -130,7 +130,7 @@ exports.createGroup = async (req, res) => {
 };
 
 // Admin: Update group
-exports.updateGroup = async (req, res) => {
+export const updateGroup = async (req, res) => {
   try {
     const { id } = req.params;
     const data = { ...req.body };
@@ -182,7 +182,7 @@ exports.updateGroup = async (req, res) => {
 };
 
 // Admin: Delete group
-exports.deleteGroup = async (req, res) => {
+export const deleteGroup = async (req, res) => {
   try {
     await prisma.flightGroup.update({
       where: { id: parseInt(req.params.id) },

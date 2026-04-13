@@ -1,7 +1,7 @@
-const prisma = require("../config/db");
+import prisma from "../config/db.js";
 
 // Get all active packages
-exports.getPackages = async (req, res) => {
+export const getPackages = async (req, res) => {
   try {
     const { airline, sector, page = 1, limit = 20 } = req.query;
 
@@ -29,7 +29,7 @@ exports.getPackages = async (req, res) => {
 };
 
 // Get single package
-exports.getPackageById = async (req, res) => {
+export const getPackageById = async (req, res) => {
   try {
     const pkg = await prisma.umrahPackage.findUnique({
       where: { id: parseInt(req.params.id) },
@@ -47,7 +47,7 @@ exports.getPackageById = async (req, res) => {
 };
 
 // Admin: Create package
-exports.createPackage = async (req, res) => {
+export const createPackage = async (req, res) => {
   try {
     const { packageName, groupId, numDays, availableSeats, sharedPrice, doublePrice,
       triplePrice, quadPrice, departureDate, returnDate, hotels, transportId, transportCost } = req.body;
@@ -96,7 +96,7 @@ exports.createPackage = async (req, res) => {
 };
 
 // Admin: Update package
-exports.updatePackage = async (req, res) => {
+export const updatePackage = async (req, res) => {
   try {
     const { id } = req.params;
     const { packageName, groupId, numDays, availableSeats, sharedPrice, doublePrice,
@@ -153,7 +153,7 @@ exports.updatePackage = async (req, res) => {
 };
 
 // Admin: Delete package
-exports.deletePackage = async (req, res) => {
+export const deletePackage = async (req, res) => {
   try {
     await prisma.umrahPackage.update({
       where: { id: parseInt(req.params.id) },
@@ -166,7 +166,7 @@ exports.deletePackage = async (req, res) => {
 };
 
 // Get visa types
-exports.getVisaTypes = async (req, res) => {
+export const getVisaTypes = async (req, res) => {
   try {
     const visaTypes = await prisma.visaType.findMany({ where: { isActive: true } });
     res.json(visaTypes);
@@ -176,7 +176,7 @@ exports.getVisaTypes = async (req, res) => {
 };
 
 // Get transport options
-exports.getTransports = async (req, res) => {
+export const getTransports = async (req, res) => {
   try {
     const transports = await prisma.transport.findMany({ where: { isActive: true } });
     res.json(transports);
@@ -186,7 +186,7 @@ exports.getTransports = async (req, res) => {
 };
 
 // Get hotels by city
-exports.getHotels = async (req, res) => {
+export const getHotels = async (req, res) => {
   try {
     const { city, rating, distance, hotel } = req.query;
     const where = { isActive: true };

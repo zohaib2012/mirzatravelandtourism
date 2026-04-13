@@ -1,14 +1,14 @@
-const router = require("express").Router();
-const booking = require("../controllers/bookingController");
-const { authenticate, authorizeAdmin } = require("../middleware/auth");
+import { Router } from "express";
+import * as booking from "../controllers/bookingController.js";
+import { authenticate, authorizeAdmin } from "../middleware/auth.js";
 
-// Agent routes
+const router = Router();
+
 router.post("/", authenticate, booking.createBooking);
 router.get("/my", authenticate, booking.getMyBookings);
 router.get("/:id", authenticate, booking.getBookingById);
 
-// Admin routes
 router.get("/", authenticate, authorizeAdmin, booking.getAllBookings);
 router.put("/:id/status", authenticate, authorizeAdmin, booking.updateBookingStatus);
 
-module.exports = router;
+export default router;

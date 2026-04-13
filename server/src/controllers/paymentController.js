@@ -1,8 +1,8 @@
-const prisma = require("../config/db");
-const { generateVoucherId } = require("../utils/helpers");
+import prisma from "../config/db.js";
+import { generateVoucherId } from "../utils/helpers.js";
 
 // Agent: Submit payment
-exports.submitPayment = async (req, res) => {
+export const submitPayment = async (req, res) => {
   try {
     const { date, description, bankAccountId, amount } = req.body;
     const receiptUrl = req.file ? req.file.path || req.file.location : null;
@@ -36,7 +36,7 @@ exports.submitPayment = async (req, res) => {
 };
 
 // Agent: Get my payments
-exports.getMyPayments = async (req, res) => {
+export const getMyPayments = async (req, res) => {
   try {
     const { dateFrom, dateTo, status, page = 1, limit = 50 } = req.query;
 
@@ -67,7 +67,7 @@ exports.getMyPayments = async (req, res) => {
 };
 
 // Admin: Get all payments
-exports.getAllPayments = async (req, res) => {
+export const getAllPayments = async (req, res) => {
   try {
     const { dateFrom, dateTo, status, agentId, page = 1, limit = 50 } = req.query;
 
@@ -101,7 +101,7 @@ exports.getAllPayments = async (req, res) => {
 };
 
 // Admin: Update payment status (post/unpost)
-exports.updatePaymentStatus = async (req, res) => {
+export const updatePaymentStatus = async (req, res) => {
   try {
     const { status, remarks } = req.body;
     const paymentId = parseInt(req.params.id);
@@ -134,7 +134,7 @@ exports.updatePaymentStatus = async (req, res) => {
 };
 
 // Get ledger entries
-exports.getLedger = async (req, res) => {
+export const getLedger = async (req, res) => {
   try {
     const { dateFrom, dateTo, page = 1, limit = 100 } = req.query;
     const agentId = req.user.role === "ADMIN" && req.query.agentId
@@ -179,7 +179,7 @@ exports.getLedger = async (req, res) => {
 };
 
 // Get bank accounts
-exports.getBankAccounts = async (req, res) => {
+export const getBankAccounts = async (req, res) => {
   try {
     const accounts = await prisma.bankAccount.findMany({ where: { isActive: true } });
     res.json(accounts);
