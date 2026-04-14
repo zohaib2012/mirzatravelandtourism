@@ -890,7 +890,16 @@ export const getAgentLedger = async (req, res) => {
 export const getCompanySettings = async (req, res) => {
   try {
     const settings = await prisma.companySetting.findFirst();
-    res.json(settings);
+    if (!settings) return res.json(null);
+    // Normalize to match frontend form field names
+    res.json({
+      ...settings,
+      facebook: settings.facebookUrl || "",
+      instagram: settings.instagramUrl || "",
+      twitter: settings.twitterUrl || "",
+      youtube: settings.youtubeUrl || "",
+      linkedin: settings.linkedinUrl || "",
+    });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
@@ -898,18 +907,40 @@ export const getCompanySettings = async (req, res) => {
 
 export const updateCompanySettings = async (req, res) => {
   try {
+    const {
+      companyName, tagline, logoUrl, email, phone, whatsapp, address,
+      facebook, instagram, twitter, youtube, linkedin,
+      facebookUrl, instagramUrl, twitterUrl, youtubeUrl, linkedinUrl,
+      heroVideoUrl, heroImageUrl,
+    } = req.body;
+
+    const data = {
+      companyName: companyName || "Mirza Travel & Tourism",
+      tagline: tagline || null,
+      logoUrl: logoUrl || null,
+      email: email || null,
+      phone: phone || null,
+      whatsapp: whatsapp || null,
+      address: address || null,
+      facebookUrl: facebookUrl || facebook || null,
+      instagramUrl: instagramUrl || instagram || null,
+      twitterUrl: twitterUrl || twitter || null,
+      youtubeUrl: youtubeUrl || youtube || null,
+      linkedinUrl: linkedinUrl || linkedin || null,
+      heroVideoUrl: heroVideoUrl || null,
+      heroImageUrl: heroImageUrl || null,
+    };
+
     let settings = await prisma.companySetting.findFirst();
     if (settings) {
-      settings = await prisma.companySetting.update({
-        where: { id: settings.id },
-        data: req.body,
-      });
+      settings = await prisma.companySetting.update({ where: { id: settings.id }, data });
     } else {
-      settings = await prisma.companySetting.create({ data: req.body });
+      settings = await prisma.companySetting.create({ data });
     }
     res.json({ message: "Settings updated", settings });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    console.error("Update settings error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
