@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { FaCog, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaShieldAlt, FaEye, FaEyeSlash, FaEnvelope, FaLock, FaArrowRight } from "react-icons/fa";
 import toast from "react-hot-toast";
 
 const AdminLogin = () => {
@@ -20,7 +20,7 @@ const AdminLogin = () => {
         toast.error("Admin access only");
         return;
       }
-      toast.success("Admin login successful!");
+      toast.success("Welcome, Admin!");
       navigate("/admin");
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed");
@@ -30,38 +30,150 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-primary to-gray-900 flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md animate-slideUp">
-        <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-3">
-            <FaCog className="text-2xl text-white" />
+    <div className="min-h-screen flex flex-col lg:flex-row">
+      {/* Left dark panel */}
+      <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-12 bg-[#030f1a] overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.04]"
+          style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "30px 30px" }} />
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/30 rounded-full blur-3xl" />
+        <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-accent/10 rounded-full blur-3xl" />
+
+        {/* Logo */}
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="w-12 h-12 bg-gradient-to-br from-primary to-deepblue rounded-xl flex items-center justify-center shadow-lg border border-white/10">
+            <FaShieldAlt className="text-accent text-xl" />
           </div>
-          <h1 className="text-2xl font-bold text-primary font-poppins">Admin Panel</h1>
-          <p className="text-sm text-gray-500">Sign in to manage the platform</p>
+          <div>
+            <div className="text-white font-bold text-lg font-poppins">MIRZA TRAVEL</div>
+            <div className="text-accent text-[10px] font-semibold tracking-widest uppercase">Admin Panel</div>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="relative z-10 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none"
-              placeholder="admin@mirzatravel.pk" required />
+            <div className="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold px-3 py-1.5 rounded-full mb-5">
+              <FaShieldAlt className="text-xs" /> Restricted Access
+            </div>
+            <h2 className="text-3xl xl:text-4xl font-bold text-white font-poppins leading-snug">
+              Admin<br />
+              <span className="text-accent">Control Center</span>
+            </h2>
+            <p className="text-white/50 text-sm mt-3 max-w-xs leading-relaxed">
+              Secure administrative access to manage agents, bookings, payments, and platform settings.
+            </p>
           </div>
-          <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input type={showPassword ? "text" : "password"} value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none pr-10"
-              placeholder="Enter password" required />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-9 text-gray-400">
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </button>
+
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { label: "Agents", value: "Manage" },
+              { label: "Bookings", value: "Monitor" },
+              { label: "Payments", value: "Verify" },
+              { label: "Reports", value: "Analytics" },
+            ].map((item, i) => (
+              <div key={i} className="p-4 bg-white/5 border border-white/10 rounded-xl">
+                <p className="text-accent text-xs font-bold">{item.value}</p>
+                <p className="text-white/60 text-xs mt-0.5">{item.label}</p>
+              </div>
+            ))}
           </div>
-          <button type="submit" disabled={loading}
-            className="w-full py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-all disabled:opacity-50">
-            {loading ? "Logging in..." : "Login to Admin Panel"}
-          </button>
-        </form>
+        </div>
+
+        <p className="relative z-10 text-white/20 text-xs">
+          This area is restricted to authorized administrators only.
+        </p>
+      </div>
+
+      {/* Right form */}
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-8 py-12 bg-gray-50 min-h-screen lg:min-h-0">
+        <div className="w-full max-w-md">
+          {/* Mobile header */}
+          <div className="flex lg:hidden justify-center mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-lg">
+                <FaShieldAlt className="text-accent text-xl" />
+              </div>
+              <div>
+                <div className="text-primary font-bold text-lg font-poppins">Admin Panel</div>
+                <div className="text-gray-400 text-xs">Mirza Travel & Tourism</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 font-poppins">Admin Sign In</h1>
+            <p className="text-gray-500 text-sm mt-1">Enter your administrator credentials to continue</p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
+            {/* Warning bar */}
+            <div className="flex items-center gap-2.5 p-3.5 bg-red-50 border border-red-100 rounded-xl mb-6">
+              <FaShieldAlt className="text-red-400 shrink-0" />
+              <p className="text-xs text-red-600 font-medium">Restricted area — authorized personnel only</p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Admin Email</label>
+                <div className="relative">
+                  <FaEnvelope className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+                  <input
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:border-primary focus:outline-none transition-colors bg-gray-50 focus:bg-white"
+                    placeholder="admin@mirzatravel.pk"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+                <div className="relative">
+                  <FaLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    className="w-full pl-10 pr-12 py-3 border-2 border-gray-200 rounded-xl text-sm focus:border-primary focus:outline-none transition-colors bg-gray-50 focus:bg-white"
+                    placeholder="••••••••"
+                    required
+                  />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors">
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+              </div>
+
+              <button type="submit" disabled={loading}
+                className="w-full py-3.5 bg-gradient-to-r from-[#030f1a] to-primary text-white font-bold rounded-xl text-sm hover:opacity-95 transition-all disabled:opacity-60 shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                {loading ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Authenticating...
+                  </>
+                ) : (
+                  <><FaShieldAlt /> Access Admin Panel <FaArrowRight className="text-xs" /></>
+                )}
+              </button>
+            </form>
+
+            <div className="mt-5 pt-4 border-t border-gray-100 text-center">
+              <Link to="/" className="text-sm text-gray-400 hover:text-primary transition-colors">
+                ← Back to main website
+              </Link>
+            </div>
+          </div>
+
+          <p className="text-center text-xs text-gray-400 mt-4">
+            Agent login?{" "}
+            <Link to="/login" className="text-primary hover:text-accent font-semibold transition-colors">Click here</Link>
+          </p>
+        </div>
       </div>
     </div>
   );
