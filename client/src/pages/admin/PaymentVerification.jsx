@@ -46,7 +46,7 @@ const PaymentVerification = () => {
 
   const openRemark = (payment, targetStatus) => {
     setRemarkModal({ payment, targetStatus });
-    setRemark(payment.adminRemarks || "");
+    setRemark(payment.remarks || "");
   };
 
   return (
@@ -90,7 +90,7 @@ const PaymentVerification = () => {
                   <div className="font-semibold">{p.agent?.agencyName || p.agent?.contactPerson}</div>
                   <div className="text-xs text-gray-500">{p.agent?.agentCode}</div>
                 </td>
-                <td className="px-3 py-3 text-xs">{format(new Date(p.paymentDate), "dd MMM yyyy")}</td>
+                <td className="px-3 py-3 text-xs">{p.paymentDate ? format(new Date(p.paymentDate), "dd MMM yyyy") : format(new Date(p.createdAt), "dd MMM yyyy")}</td>
                 <td className="px-3 py-3 max-w-[150px] truncate">{p.description || "-"}</td>
                 <td className="px-3 py-3 text-xs">{p.bankAccount?.bankName}<br />{p.bankAccount?.accountTitle}</td>
                 <td className="px-3 py-3 text-right font-bold text-green-700">PKR {Number(p.amount).toLocaleString()}</td>
@@ -106,7 +106,7 @@ const PaymentVerification = () => {
                   <span className={`px-2 py-1 rounded text-xs font-bold ${p.status === "POSTED" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}>
                     {p.status}
                   </span>
-                  {p.adminRemarks && <div className="text-xs text-gray-400 mt-1 max-w-[100px] truncate">{p.adminRemarks}</div>}
+                  {p.remarks && <div className="text-xs text-gray-400 mt-1 max-w-[100px] truncate">{p.remarks}</div>}
                 </td>
                 <td className="px-3 py-3">
                   <div className="flex gap-1">
@@ -145,7 +145,7 @@ const PaymentVerification = () => {
             <div className="p-3 bg-gray-50 rounded text-sm">
               <p><strong>Agent:</strong> {remarkModal.payment.agent?.agencyName} ({remarkModal.payment.agent?.agentCode})</p>
               <p><strong>Amount:</strong> PKR {Number(remarkModal.payment.amount).toLocaleString()}</p>
-              <p><strong>Date:</strong> {format(new Date(remarkModal.payment.paymentDate), "dd MMM yyyy")}</p>
+              <p><strong>Date:</strong> {format(new Date(remarkModal.payment.paymentDate || remarkModal.payment.createdAt), "dd MMM yyyy")}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Admin Remarks (optional)</label>

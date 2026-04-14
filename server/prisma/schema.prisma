@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ─── ENUMS ────────────────────────────────────────────
@@ -96,6 +97,7 @@ model User {
 model Airline {
   id       Int     @id @default(autoincrement())
   name     String
+  code     String? @map("code")
   logoUrl  String? @map("logo_url")
   isActive Boolean @default(true) @map("is_active")
 
@@ -322,7 +324,8 @@ model BankAccount {
   accountTitle  String   @map("account_title")
   accountNumber String   @map("account_number")
   iban          String?
-  branchAddress String?  @map("branch_address")
+  branchName    String?  @map("branch_name")
+  branchCode    String?  @map("branch_code")
   logoUrl       String?  @map("logo_url")
   isActive      Boolean  @default(true) @map("is_active")
 

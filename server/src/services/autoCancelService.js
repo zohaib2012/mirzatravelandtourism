@@ -21,27 +21,24 @@ export const runAutoCancel = async () => {
 
     const bookingIds = expired.map((b) => b.id);
 
-    // Cancel all expired bookings in a transaction
-    await prisma.$transaction(async (tx) => {
-      // Mark as CANCELLED with autoCancelledAt timestamp
-      await tx.booking.updateMany({
-        where: { id: { in: bookingIds } },
-        data: {
-          status: "CANCELLED",
-          autoCancelledAt: now,
-        },
-      });
-
-      // Restore seats for airline group bookings
-      for (const b of expired) {
-        if (b.groupId) {
-          await tx.flightGroup.update({
-            where: { id: b.groupId },
-            data: { availableSeats: { increment: b.totalSeats } },
-          });
-        }
-      }
+    // Mark as CANCELLED with autoCancelledAt timestamp
+    await prisma.booking.updateMany({
+      where: { id: { in: bookingIds } },
+      data: {
+        status: "CANCELLED",
+        autoCancelledAt: now,
+      },
     });
+
+    // Restore seats for airline group bookings
+    for (const b of expired) {
+      if (b.groupId) {
+        await prisma.flightGroup.update({
+          where: { id: b.groupId },
+          data: { availableSeats: { increment: b.totalSeats } },
+        });
+      }
+    }
 
     console.log(`[AutoCancel] Cancelled ${expired.length} expired booking(s)`);
     return expired.length;

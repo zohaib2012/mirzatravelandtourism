@@ -93,7 +93,7 @@ export const updateAgentStatus = async (req, res) => {
 export const getAirlines = async (req, res) => {
   try {
     const airlines = await prisma.airline.findMany({ orderBy: { name: "asc" } });
-    res.json(airlines);
+    res.json({ airlines });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
@@ -101,21 +101,25 @@ export const getAirlines = async (req, res) => {
 
 export const createAirline = async (req, res) => {
   try {
-    const airline = await prisma.airline.create({ data: req.body });
+    const { name, code, logoUrl } = req.body;
+    const airline = await prisma.airline.create({ data: { name, code: code || null, logoUrl: logoUrl || null } });
     res.status(201).json({ message: "Airline created", airline });
   } catch (error) {
+    console.error("Create airline error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
 
 export const updateAirline = async (req, res) => {
   try {
+    const { name, code, logoUrl } = req.body;
     const airline = await prisma.airline.update({
       where: { id: parseInt(req.params.id) },
-      data: req.body,
+      data: { name, code: code || null, logoUrl: logoUrl || null },
     });
     res.json({ message: "Airline updated", airline });
   } catch (error) {
+    console.error("Update airline error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -275,21 +279,27 @@ export const updateTransport = async (req, res) => {
 // CRUD Bank Accounts
 export const createBankAccount = async (req, res) => {
   try {
-    const account = await prisma.bankAccount.create({ data: req.body });
+    const { bankName, accountTitle, accountNumber, iban, branchName, branchCode, logoUrl } = req.body;
+    const account = await prisma.bankAccount.create({
+      data: { bankName, accountTitle, accountNumber, iban: iban || null, branchName: branchName || null, branchCode: branchCode || null, logoUrl: logoUrl || null },
+    });
     res.status(201).json({ message: "Bank account created", account });
   } catch (error) {
+    console.error("Create bank account error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
 
 export const updateBankAccount = async (req, res) => {
   try {
+    const { bankName, accountTitle, accountNumber, iban, branchName, branchCode, logoUrl } = req.body;
     const account = await prisma.bankAccount.update({
       where: { id: parseInt(req.params.id) },
-      data: req.body,
+      data: { bankName, accountTitle, accountNumber, iban: iban || null, branchName: branchName || null, branchCode: branchCode || null, logoUrl: logoUrl || null },
     });
     res.json({ message: "Bank account updated", account });
   } catch (error) {
+    console.error("Update bank account error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -473,7 +483,7 @@ export const updatePaymentStatus = async (req, res) => {
 
     const updated = await prisma.payment.update({
       where: { id: parseInt(req.params.id) },
-      data: { status, adminRemarks },
+      data: { status, remarks: adminRemarks || null },
     });
 
     // If posting payment, create ledger credit entry
@@ -482,10 +492,11 @@ export const updatePaymentStatus = async (req, res) => {
         data: {
           agentId: payment.agentId,
           paymentId: payment.id,
-          description: `Payment Posted: ${payment.description || "Payment received"}`,
+          date: payment.date || new Date(),
+          description: `Payment Posted: ${payment.description || "Bank Transfer"}`,
           credit: payment.amount,
           debit: 0,
-          type: "CREDIT",
+          balance: 0,
         },
       });
     }
@@ -641,27 +652,28 @@ export const createGroup = async (req, res) => {
   try {
     const { flightLegs, ...groupData } = req.body;
     if (groupData.departureDate) groupData.departureDate = new Date(groupData.departureDate);
-    if (groupData.returnDate) groupData.returnDate = new Date(groupData.returnDate);
+    groupData.returnDate = groupData.returnDate ? new Date(groupData.returnDate) : null;
     if (groupData.airlineId) groupData.airlineId = parseInt(groupData.airlineId);
     if (groupData.sectorId) groupData.sectorId = parseInt(groupData.sectorId);
     if (groupData.totalSeats) groupData.totalSeats = parseInt(groupData.totalSeats);
     if (groupData.availableSeats) groupData.availableSeats = parseInt(groupData.availableSeats);
     if (groupData.adultPrice) groupData.adultPrice = parseFloat(groupData.adultPrice);
-    if (groupData.childPrice) groupData.childPrice = parseFloat(groupData.childPrice);
-    if (groupData.infantPrice) groupData.infantPrice = parseFloat(groupData.infantPrice);
+    groupData.childPrice = groupData.childPrice ? parseFloat(groupData.childPrice) : null;
+    groupData.infantPrice = groupData.infantPrice ? parseFloat(groupData.infantPrice) : null;
 
     const group = await prisma.flightGroup.create({
       data: {
         ...groupData,
         flightLegs: flightLegs?.length > 0 ? {
-          create: flightLegs.map((leg) => ({
+          create: flightLegs.map((leg, i) => ({
+            legNumber: i + 1,
             flightNumber: leg.flightNumber,
             origin: leg.origin,
             destination: leg.destination,
-            departureDate: new Date(leg.departureDate),
-            departureTime: leg.departureTime,
-            arrivalTime: leg.arrivalTime,
-            baggage: leg.baggage,
+            departureDate: leg.departureDate ? new Date(leg.departureDate) : new Date(),
+            departureTime: leg.departureTime || null,
+            arrivalTime: leg.arrivalTime || null,
+            baggage: leg.baggage || null,
           })),
         } : undefined,
       },
@@ -679,38 +691,38 @@ export const updateGroup = async (req, res) => {
   try {
     const { flightLegs, ...groupData } = req.body;
     if (groupData.departureDate) groupData.departureDate = new Date(groupData.departureDate);
-    if (groupData.returnDate) groupData.returnDate = new Date(groupData.returnDate);
+    groupData.returnDate = groupData.returnDate ? new Date(groupData.returnDate) : null;
     if (groupData.airlineId) groupData.airlineId = parseInt(groupData.airlineId);
     if (groupData.sectorId) groupData.sectorId = parseInt(groupData.sectorId);
     if (groupData.totalSeats) groupData.totalSeats = parseInt(groupData.totalSeats);
     if (groupData.availableSeats) groupData.availableSeats = parseInt(groupData.availableSeats);
     if (groupData.adultPrice) groupData.adultPrice = parseFloat(groupData.adultPrice);
-    if (groupData.childPrice) groupData.childPrice = parseFloat(groupData.childPrice);
-    if (groupData.infantPrice) groupData.infantPrice = parseFloat(groupData.infantPrice);
+    groupData.childPrice = groupData.childPrice ? parseFloat(groupData.childPrice) : null;
+    groupData.infantPrice = groupData.infantPrice ? parseFloat(groupData.infantPrice) : null;
 
-    await prisma.$transaction(async (tx) => {
-      await tx.flightGroup.update({
-        where: { id: parseInt(req.params.id) },
-        data: groupData,
-      });
-      if (flightLegs) {
-        await tx.flightLeg.deleteMany({ where: { groupId: parseInt(req.params.id) } });
-        if (flightLegs.length > 0) {
-          await tx.flightLeg.createMany({
-            data: flightLegs.map((leg) => ({
-              groupId: parseInt(req.params.id),
-              flightNumber: leg.flightNumber,
-              origin: leg.origin,
-              destination: leg.destination,
-              departureDate: new Date(leg.departureDate),
-              departureTime: leg.departureTime,
-              arrivalTime: leg.arrivalTime,
-              baggage: leg.baggage,
-            })),
-          });
-        }
-      }
+    // Sequential queries (Neon.tech pooler doesn't support long interactive transactions)
+    await prisma.flightGroup.update({
+      where: { id: parseInt(req.params.id) },
+      data: groupData,
     });
+    if (flightLegs) {
+      await prisma.flightLeg.deleteMany({ where: { groupId: parseInt(req.params.id) } });
+      if (flightLegs.length > 0) {
+        await prisma.flightLeg.createMany({
+          data: flightLegs.map((leg, i) => ({
+            groupId: parseInt(req.params.id),
+            legNumber: i + 1,
+            flightNumber: leg.flightNumber,
+            origin: leg.origin,
+            destination: leg.destination,
+            departureDate: leg.departureDate ? new Date(leg.departureDate) : new Date(),
+            departureTime: leg.departureTime || null,
+            arrivalTime: leg.arrivalTime || null,
+            baggage: leg.baggage || null,
+          })),
+        });
+      }
+    }
     const group = await prisma.flightGroup.findUnique({
       where: { id: parseInt(req.params.id) },
       include: { airline: true, sector: true, flightLegs: true },
@@ -739,16 +751,17 @@ export const deleteGroup = async (req, res) => {
 export const getAdminPackages = async (req, res) => {
   try {
     const packages = await prisma.umrahPackage.findMany({
+      where: { status: { not: "INACTIVE" } },
       include: {
         group: { include: { airline: true, sector: true } },
         packageHotels: { include: { hotel: true } },
-        visaType: true,
-        transport: true,
+        _count: { select: { bookings: true } },
       },
       orderBy: { createdAt: "desc" },
     });
     res.json({ packages });
-  } catch {
+  } catch (err) {
+    console.error("Get packages error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -757,26 +770,37 @@ export const getAdminPackages = async (req, res) => {
 export const createPackage = async (req, res) => {
   try {
     const { packageHotels, ...data } = req.body;
-    if (data.departureDate) data.departureDate = new Date(data.departureDate);
-    if (data.returnDate) data.returnDate = new Date(data.returnDate);
-    if (data.groupId) data.groupId = parseInt(data.groupId);
-    if (data.visaTypeId) data.visaTypeId = parseInt(data.visaTypeId);
-    if (data.transportId) data.transportId = parseInt(data.transportId);
+    data.departureDate = data.departureDate ? new Date(data.departureDate) : null;
+    data.returnDate = data.returnDate ? new Date(data.returnDate) : null;
+    data.groupId = data.groupId ? parseInt(data.groupId) : null;
+    data.numDays = data.numDays ? parseInt(data.numDays) : null;
+    data.availableSeats = data.availableSeats ? parseInt(data.availableSeats) : null;
+    data.sharedPrice = data.sharedPrice ? parseFloat(data.sharedPrice) : null;
+    data.doublePrice = data.doublePrice ? parseFloat(data.doublePrice) : null;
+    data.triplePrice = data.triplePrice ? parseFloat(data.triplePrice) : null;
+    data.quadPrice = data.quadPrice ? parseFloat(data.quadPrice) : null;
 
-    const pkg = await prisma.umrahPackage.create({
-      data: {
-        ...data,
-        packageHotels: packageHotels?.length > 0 ? {
-          create: packageHotels.map((ph) => ({
+    // Remove unknown fields
+    delete data.visaTypeId; delete data.transportId;
+
+    const pkg = await prisma.umrahPackage.create({ data });
+
+    // Add hotel associations separately
+    if (packageHotels?.length > 0) {
+      for (const ph of packageHotels) {
+        await prisma.packageHotel.create({
+          data: {
+            packageId: pkg.id,
             hotelId: parseInt(ph.hotelId),
             city: ph.city,
-            nights: parseInt(ph.nights),
+            nights: parseInt(ph.nights || 0),
             checkinDate: ph.checkinDate ? new Date(ph.checkinDate) : null,
             checkoutDate: ph.checkoutDate ? new Date(ph.checkoutDate) : null,
-          })),
-        } : undefined,
-      },
-    });
+          },
+        });
+      }
+    }
+
     res.status(201).json({ message: "Package created", package: pkg });
   } catch (err) {
     console.error("Create package error:", err);
@@ -788,18 +812,39 @@ export const createPackage = async (req, res) => {
 export const updatePackage = async (req, res) => {
   try {
     const { packageHotels, ...data } = req.body;
-    if (data.departureDate) data.departureDate = new Date(data.departureDate);
-    if (data.returnDate) data.returnDate = new Date(data.returnDate);
-    if (data.groupId) data.groupId = parseInt(data.groupId);
-    if (data.visaTypeId) data.visaTypeId = parseInt(data.visaTypeId);
-    if (data.transportId) data.transportId = parseInt(data.transportId);
+    data.departureDate = data.departureDate ? new Date(data.departureDate) : null;
+    data.returnDate = data.returnDate ? new Date(data.returnDate) : null;
+    data.groupId = data.groupId ? parseInt(data.groupId) : null;
+    data.numDays = data.numDays ? parseInt(data.numDays) : null;
+    data.availableSeats = data.availableSeats ? parseInt(data.availableSeats) : null;
+    data.sharedPrice = data.sharedPrice ? parseFloat(data.sharedPrice) : null;
+    data.doublePrice = data.doublePrice ? parseFloat(data.doublePrice) : null;
+    data.triplePrice = data.triplePrice ? parseFloat(data.triplePrice) : null;
+    data.quadPrice = data.quadPrice ? parseFloat(data.quadPrice) : null;
+    delete data.visaTypeId; delete data.transportId;
 
-    await prisma.umrahPackage.update({
-      where: { id: parseInt(req.params.id) },
-      data,
-    });
+    await prisma.umrahPackage.update({ where: { id: parseInt(req.params.id) }, data });
+
+    // Re-sync hotel associations
+    if (packageHotels !== undefined) {
+      await prisma.packageHotel.deleteMany({ where: { packageId: parseInt(req.params.id) } });
+      for (const ph of (packageHotels || [])) {
+        await prisma.packageHotel.create({
+          data: {
+            packageId: parseInt(req.params.id),
+            hotelId: parseInt(ph.hotelId),
+            city: ph.city,
+            nights: parseInt(ph.nights || 0),
+            checkinDate: ph.checkinDate ? new Date(ph.checkinDate) : null,
+            checkoutDate: ph.checkoutDate ? new Date(ph.checkoutDate) : null,
+          },
+        });
+      }
+    }
+
     res.json({ message: "Package updated" });
-  } catch {
+  } catch (err) {
+    console.error("Update package error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -809,10 +854,11 @@ export const deletePackage = async (req, res) => {
   try {
     await prisma.umrahPackage.update({
       where: { id: parseInt(req.params.id) },
-      data: { isActive: false },
+      data: { status: "INACTIVE" },
     });
     res.json({ message: "Package deactivated" });
-  } catch {
+  } catch (err) {
+    console.error("Delete package error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -863,6 +909,62 @@ export const updateCompanySettings = async (req, res) => {
     }
     res.json({ message: "Settings updated", settings });
   } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Reports / Analytics
+export const getReports = async (req, res) => {
+  try {
+    const now = new Date();
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+    const [
+      totalBookings, confirmedBookings, cancelledBookings, pendingBookings,
+      totalAgents, activeAgents, totalRevenue, totalPayments,
+      bookingsByType, recentBookings, topAgents,
+    ] = await Promise.all([
+      prisma.booking.count(),
+      prisma.booking.count({ where: { status: "CONFIRMED" } }),
+      prisma.booking.count({ where: { status: "CANCELLED" } }),
+      prisma.booking.count({ where: { status: "ON_REQUEST" } }),
+      prisma.user.count({ where: { role: "AGENT" } }),
+      prisma.user.count({ where: { role: "AGENT", status: "ACTIVE" } }),
+      prisma.booking.aggregate({ _sum: { totalPrice: true }, where: { status: "CONFIRMED" } }),
+      prisma.payment.aggregate({ _sum: { amount: true }, where: { status: "POSTED" } }),
+      prisma.booking.groupBy({ by: ["bookingType"], _count: true }),
+      prisma.booking.findMany({
+        take: 10, orderBy: { createdAt: "desc" },
+        include: { agent: { select: { agentCode: true, agencyName: true } }, group: { include: { airline: true } } },
+      }),
+      prisma.booking.groupBy({
+        by: ["agentId"], _count: { id: true }, _sum: { totalPrice: true },
+        orderBy: { _count: { id: "desc" } }, take: 5,
+      }),
+    ]);
+
+    // Monthly bookings for current year
+    const monthlyBookings = await prisma.$queryRaw`
+      SELECT EXTRACT(MONTH FROM created_at)::int AS month, COUNT(*)::int AS count,
+             SUM(total_price)::float AS revenue
+      FROM bookings WHERE created_at >= ${startOfYear} GROUP BY month ORDER BY month
+    `;
+
+    res.json({
+      totals: {
+        bookings: totalBookings, confirmed: confirmedBookings,
+        cancelled: cancelledBookings, pending: pendingBookings,
+        agents: totalAgents, activeAgents,
+        revenue: Number(totalRevenue._sum.totalPrice || 0),
+        payments: Number(totalPayments._sum.amount || 0),
+      },
+      bookingsByType,
+      recentBookings,
+      topAgents,
+      monthlyBookings,
+    });
+  } catch (err) {
+    console.error("Reports error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };

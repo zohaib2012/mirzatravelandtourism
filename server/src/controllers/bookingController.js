@@ -23,7 +23,7 @@ export const createBooking = async (req, res) => {
         childrenCount * Number(group.childPrice || 0) +
         infantsCount * Number(group.infantPrice || 0);
 
-      // Generate unique booking number
+      // Generate unique booking number BEFORE transaction to avoid timeout
       let bookingNo;
       let isUnique = false;
       while (!isUnique) {
@@ -35,53 +35,52 @@ export const createBooking = async (req, res) => {
       // Set expiry (24 hours from now)
       const expiryTime = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-      const booking = await prisma.$transaction(async (tx) => {
-        // Create booking
-        const newBooking = await tx.booking.create({
-          data: {
-            bookingNo,
-            agentId: req.user.id,
-            groupId: parseInt(groupId),
-            packageId: packageId ? parseInt(packageId) : null,
-            bookingType: bookingType || "AIRLINE",
-            roomType,
-            adultsCount: parseInt(adultsCount),
-            childrenCount: parseInt(childrenCount || 0),
-            infantsCount: parseInt(infantsCount || 0),
-            totalSeats,
-            totalPrice,
-            expiryTime,
-            passengers: passengers ? {
-              create: passengers.map((p) => ({
-                name: p.name,
-                type: p.type,
-                dob: p.dob ? new Date(p.dob) : null,
-                passportNo: p.passportNo || null,
-              })),
-            } : undefined,
-          },
-          include: { passengers: true, group: { include: { airline: true, sector: true } } },
-        });
-
-        // Decrease available seats
-        await tx.flightGroup.update({
-          where: { id: parseInt(groupId) },
-          data: { availableSeats: { decrement: totalSeats } },
-        });
-
-        // Create ledger entry (debit)
-        await tx.ledgerEntry.create({
-          data: {
-            agentId: req.user.id,
-            date: new Date(),
-            description: `Booking ${bookingNo} - ${group.groupName}`,
-            debit: totalPrice,
-            bookingId: newBooking.id,
-          },
-        });
-
-        return newBooking;
+      // Create booking (sequential queries — Neon.tech serverless pooler doesn't support long transactions)
+      const newBooking = await prisma.booking.create({
+        data: {
+          bookingNo,
+          agentId: req.user.id,
+          groupId: parseInt(groupId),
+          packageId: packageId ? parseInt(packageId) : null,
+          bookingType: bookingType || "AIRLINE",
+          roomType,
+          adultsCount: parseInt(adultsCount),
+          childrenCount: parseInt(childrenCount || 0),
+          infantsCount: parseInt(infantsCount || 0),
+          totalSeats,
+          totalPrice,
+          expiryTime,
+          passengers: passengers ? {
+            create: passengers.map((p) => ({
+              name: p.name,
+              type: p.type,
+              dob: p.dob ? new Date(p.dob) : null,
+              passportNo: p.passportNo || null,
+            })),
+          } : undefined,
+        },
+        include: { passengers: true, group: { include: { airline: true, sector: true } } },
       });
+
+      // Decrease available seats
+      await prisma.flightGroup.update({
+        where: { id: parseInt(groupId) },
+        data: { availableSeats: { decrement: totalSeats } },
+      });
+
+      // Create ledger entry (debit)
+      await prisma.ledgerEntry.create({
+        data: {
+          agentId: req.user.id,
+          date: new Date(),
+          description: `Booking ${bookingNo} - ${group.groupName}`,
+          debit: totalPrice,
+          balance: totalPrice,
+          bookingId: newBooking.id,
+        },
+      });
+
+      const booking = newBooking;
 
       res.status(201).json({ message: "Booking created successfully", booking });
     } else if (packageId) {

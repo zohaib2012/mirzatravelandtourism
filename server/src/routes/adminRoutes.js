@@ -92,4 +92,7 @@ router.delete("/packages/:id", admin.deletePackage);
 router.get("/settings", admin.getCompanySettings);
 router.put("/settings", admin.updateCompanySettings);
 
+// Reports
+router.get("/reports", admin.getReports);
+
 export default router;

@@ -49,6 +49,8 @@ import OfficeBranches from "./pages/admin/OfficeBranches";
 import Authorizations from "./pages/admin/Authorizations";
 import Deals from "./pages/admin/Deals";
 import Settings from "./pages/admin/Settings";
+import AdminPackages from "./pages/admin/AdminPackages";
+import Reports from "./pages/admin/Reports";
 
 // Placeholder
 import ComingSoon from "./pages/ComingSoon";
@@ -94,14 +96,14 @@ function App() {
             <Route path="sectors" element={<Sectors />} />
             <Route path="groups" element={<AdminGroups />} />
             <Route path="bookings" element={<AdminBookings />} />
-            <Route path="packages" element={<ComingSoon title="Umrah Packages" />} />
+            <Route path="packages" element={<AdminPackages />} />
             <Route path="hotels" element={<Hotels />} />
             <Route path="visa-types" element={<VisaTypes />} />
             <Route path="transport" element={<Transport />} />
             <Route path="payments" element={<PaymentVerification />} />
             <Route path="bank-accounts" element={<BankAccounts />} />
             <Route path="ledger" element={<AgentLedgers />} />
-            <Route path="reports" element={<ComingSoon title="Reports" />} />
+            <Route path="reports" element={<Reports />} />
             <Route path="branches" element={<OfficeBranches />} />
             <Route path="authorizations" element={<Authorizations />} />
             <Route path="deals" element={<Deals />} />

@@ -1,11 +1,22 @@
 import prisma from "../config/db.js";
 import { generateVoucherId } from "../utils/helpers.js";
+import { uploadToCloudinary } from "../middleware/upload.js";
 
 // Agent: Submit payment
 export const submitPayment = async (req, res) => {
   try {
     const { date, description, bankAccountId, amount } = req.body;
-    const receiptUrl = req.file ? req.file.path || req.file.location : null;
+
+    // Upload receipt to Cloudinary if file provided
+    let receiptUrl = null;
+    if (req.file && req.file.buffer) {
+      try {
+        receiptUrl = await uploadToCloudinary(req.file.buffer, "mirza-receipts");
+      } catch (uploadErr) {
+        console.error("Cloudinary upload failed:", uploadErr.message);
+        // Continue without receipt rather than failing the whole request
+      }
+    }
 
     let voucherId;
     let isUnique = false;

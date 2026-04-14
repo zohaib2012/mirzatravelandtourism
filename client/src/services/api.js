@@ -183,6 +183,9 @@ export const adminAPI = {
   getSettings: () => api.get("/admin/settings"),
   updateSettings: (data) => api.put("/admin/settings", data),
 
+  // Reports
+  getReports: () => api.get("/admin/reports"),
+
   // Agent Ledger (admin view)
   getAgentLedger: (agentId, params) => api.get(`/admin/ledger/${agentId}`, { params }),
 };
