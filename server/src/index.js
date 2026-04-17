@@ -60,10 +60,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "Internal server error" });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  // Start auto-cancel scheduler (persistent servers only - not Vercel)
-  if (process.env.NODE_ENV !== "production") {
+if (process.env.VERCEL !== "1") {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
     startAutoCancelScheduler();
-  }
-});
+  });
+}
+
+export default app;
