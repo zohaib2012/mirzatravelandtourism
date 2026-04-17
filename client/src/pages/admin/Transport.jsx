@@ -3,8 +3,9 @@ import { adminAPI } from "../../services/api";
 import toast from "react-hot-toast";
 import { FaPlus, FaEdit, FaTrash, FaBus } from "react-icons/fa";
 import AdminModal from "../../components/admin/AdminModal";
+import { useConfirm } from "../../components/common/ConfirmDialog";
 
-const emptyForm = { name: "", type: "BUS", route: "", capacity: "", buyRate: "", sellRate: "" };
+const emptyForm = { vehicleType: "", route: "", buyRate: "", sellRate: "" };
 
 const Transport = () => {
   const [items, setItems] = useState([]);
@@ -13,6 +14,7 @@ const Transport = () => {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
+  const { confirm, Dialog } = useConfirm();
 
   useEffect(() => { load(); }, []);
 
@@ -31,16 +33,17 @@ const Transport = () => {
   const openAdd = () => { setForm(emptyForm); setEditing(null); setModal(true); };
   const openEdit = (t) => {
     setForm({
-      name: t.name || "", type: t.type || "BUS", route: t.route || "",
-      capacity: t.capacity?.toString() || "",
-      buyRate: t.buyRate?.toString() || "", sellRate: t.sellRate?.toString() || "",
+      vehicleType: t.vehicleType || "",
+      route: t.route || "",
+      buyRate: t.buyRate?.toString() || "",
+      sellRate: t.sellRate?.toString() || "",
     });
     setEditing(t);
     setModal(true);
   };
 
   const handleSave = async () => {
-    if (!form.name.trim()) return toast.error("Transport name required");
+    if (!form.vehicleType.trim()) return toast.error("Vehicle name required");
     setSubmitting(true);
     try {
       if (editing) {
@@ -60,7 +63,8 @@ const Transport = () => {
   };
 
   const handleDelete = async (id, name) => {
-    if (!confirm(`Delete transport "${name}"?`)) return;
+    const ok = await confirm({ title: "Delete Transport", message: `Are you sure you want to delete "${name}"? This action cannot be undone.` });
+    if (!ok) return;
     try {
       await adminAPI.deleteTransport(id);
       toast.success("Transport deleted");
@@ -85,9 +89,7 @@ const Transport = () => {
             <tr>
               <th className="px-3 py-3 text-left">#</th>
               <th className="px-3 py-3 text-left">Vehicle Name</th>
-              <th className="px-3 py-3 text-left">Type</th>
               <th className="px-3 py-3 text-left">Route</th>
-              <th className="px-3 py-3 text-center">Capacity</th>
               <th className="px-3 py-3 text-right">Buy Rate</th>
               <th className="px-3 py-3 text-right">Sell Rate</th>
               <th className="px-3 py-3 text-left">Actions</th>
@@ -95,24 +97,20 @@ const Transport = () => {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="8" className="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
+              <tr><td colSpan="6" className="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
             ) : items.length === 0 ? (
-              <tr><td colSpan="8" className="px-4 py-8 text-center text-gray-400">No transport added yet</td></tr>
+              <tr><td colSpan="6" className="px-4 py-8 text-center text-gray-400">No transport added yet</td></tr>
             ) : items.map((t, i) => (
               <tr key={t.id} className={`border-b ${i % 2 === 1 ? "bg-gray-50" : ""}`}>
                 <td className="px-3 py-3 text-gray-500">{i + 1}</td>
-                <td className="px-3 py-3 font-semibold flex items-center gap-2"><FaBus className="text-accent" />{t.name}</td>
-                <td className="px-3 py-3">
-                  <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs">{t.type}</span>
-                </td>
+                <td className="px-3 py-3 font-semibold flex items-center gap-2"><FaBus className="text-accent" />{t.vehicleType}</td>
                 <td className="px-3 py-3 text-xs">{t.route || "-"}</td>
-                <td className="px-3 py-3 text-center">{t.capacity || "-"}</td>
                 <td className="px-3 py-3 text-right">{t.buyRate ? Number(t.buyRate).toLocaleString() : "-"}</td>
                 <td className="px-3 py-3 text-right font-bold text-green-700">{t.sellRate ? Number(t.sellRate).toLocaleString() : "-"}</td>
                 <td className="px-3 py-3">
                   <div className="flex gap-1">
                     <button onClick={() => openEdit(t)} className="px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"><FaEdit /></button>
-                    <button onClick={() => handleDelete(t.id, t.name)} className="px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"><FaTrash /></button>
+                    <button onClick={() => handleDelete(t.id, t.vehicleType)} className="px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"><FaTrash /></button>
                   </div>
                 </td>
               </tr>
@@ -124,23 +122,11 @@ const Transport = () => {
       {modal && (
         <AdminModal title={editing ? "Edit Transport" : "Add Transport"} onClose={() => setModal(false)} onSubmit={handleSave} submitting={submitting}>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Vehicle Name *</label>
-                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
-                  placeholder="e.g. Luxury Bus 50 Seater" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg text-sm">
-                  <option value="BUS">Bus</option>
-                  <option value="VAN">Van</option>
-                  <option value="CAR">Car</option>
-                  <option value="COASTER">Coaster</option>
-                </select>
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Vehicle Name *</label>
+              <input value={form.vehicleType} onChange={(e) => setForm({ ...form, vehicleType: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
+                placeholder="e.g. Luxury Bus 50 Seater" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Route</label>
@@ -148,12 +134,7 @@ const Transport = () => {
                 className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
                 placeholder="e.g. Makkah - Madina - Makkah" />
             </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Capacity (Seats)</label>
-                <input type="number" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" placeholder="50" />
-              </div>
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Buy Rate (PKR)</label>
                 <input type="number" value={form.buyRate} onChange={(e) => setForm({ ...form, buyRate: e.target.value })}
@@ -168,6 +149,7 @@ const Transport = () => {
           </div>
         </AdminModal>
       )}
+      {Dialog}
     </div>
   );
 };

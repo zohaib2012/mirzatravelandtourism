@@ -3,6 +3,7 @@ import { adminAPI } from "../../services/api";
 import toast from "react-hot-toast";
 import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import AdminModal from "../../components/admin/AdminModal";
+import { useConfirm } from "../../components/common/ConfirmDialog";
 
 const emptyForm = { title: "", description: "", imageUrl: "" };
 
@@ -13,6 +14,7 @@ const Deals = () => {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
+  const { confirm, Dialog } = useConfirm();
 
   useEffect(() => { load(); }, []);
 
@@ -56,7 +58,8 @@ const Deals = () => {
   };
 
   const handleDelete = async (id, title) => {
-    if (!confirm(`Delete deal "${title}"?`)) return;
+    const ok = await confirm({ title: "Delete Deal", message: `Delete deal "${title}"? This action cannot be undone.` });
+    if (!ok) return;
     try {
       await adminAPI.deleteDeal(id);
       toast.success("Deal deleted");
@@ -127,6 +130,7 @@ const Deals = () => {
           </div>
         </AdminModal>
       )}
+      {Dialog}
     </div>
   );
 };

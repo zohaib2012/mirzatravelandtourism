@@ -3,6 +3,7 @@ import { adminAPI } from "../../services/api";
 import toast from "react-hot-toast";
 import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import AdminModal from "../../components/admin/AdminModal";
+import { useConfirm } from "../../components/common/ConfirmDialog";
 
 const emptyForm = { name: "", code: "", logoUrl: "" };
 
@@ -13,6 +14,7 @@ const Airlines = () => {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
+  const { confirm, Dialog } = useConfirm();
 
   useEffect(() => { load(); }, []);
 
@@ -52,7 +54,8 @@ const Airlines = () => {
   };
 
   const handleDelete = async (id, name) => {
-    if (!confirm(`Delete "${name}"? This may affect existing groups.`)) return;
+    const ok = await confirm({ title: "Delete Airline", message: `Delete "${name}"? This may affect existing flight groups.` });
+    if (!ok) return;
     try {
       await adminAPI.deleteAirline(id);
       toast.success("Airline deleted");
@@ -149,6 +152,7 @@ const Airlines = () => {
           </div>
         </AdminModal>
       )}
+      {Dialog}
     </div>
   );
 };

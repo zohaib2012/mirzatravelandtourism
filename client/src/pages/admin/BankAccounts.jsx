@@ -3,6 +3,7 @@ import { adminAPI } from "../../services/api";
 import toast from "react-hot-toast";
 import { FaPlus, FaEdit, FaTrash, FaUniversity } from "react-icons/fa";
 import AdminModal from "../../components/admin/AdminModal";
+import { useConfirm } from "../../components/common/ConfirmDialog";
 
 const emptyForm = { bankName: "", accountTitle: "", accountNumber: "", iban: "", branchName: "", branchCode: "" };
 
@@ -13,6 +14,7 @@ const BankAccounts = () => {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
+  const { confirm, Dialog } = useConfirm();
 
   useEffect(() => { load(); }, []);
 
@@ -61,7 +63,8 @@ const BankAccounts = () => {
   };
 
   const handleDelete = async (id, name) => {
-    if (!confirm(`Deactivate bank account "${name}"?`)) return;
+    const ok = await confirm({ title: "Deactivate Account", message: `Deactivate bank account "${name}"? It will be removed from the active list.`, confirmLabel: "Deactivate" });
+    if (!ok) return;
     try {
       await adminAPI.deleteBankAccount(id);
       toast.success("Bank account deactivated");
@@ -151,6 +154,7 @@ const BankAccounts = () => {
           </div>
         </AdminModal>
       )}
+      {Dialog}
     </div>
   );
 };

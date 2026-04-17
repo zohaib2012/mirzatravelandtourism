@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import toast from "react-hot-toast";
 import { FaPlus, FaEdit, FaTrash, FaPlane } from "react-icons/fa";
 import AdminModal from "../../components/admin/AdminModal";
+import { useConfirm } from "../../components/common/ConfirmDialog";
 
 const categoryOptions = [
   { value: "UMRAH", label: "Umrah" },
@@ -32,6 +33,7 @@ const AdminGroups = () => {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
+  const { confirm, Dialog } = useConfirm();
 
   useEffect(() => { loadAll(); }, [categoryFilter]);
 
@@ -104,7 +106,8 @@ const AdminGroups = () => {
   };
 
   const handleDelete = async (id, name) => {
-    if (!confirm(`Deactivate group "${name}"?`)) return;
+    const ok = await confirm({ title: "Deactivate Group", message: `Deactivate group "${name}"? It will no longer be visible to agents.`, confirmLabel: "Deactivate" });
+    if (!ok) return;
     try {
       await adminAPI.deleteGroup(id);
       toast.success("Group deactivated");
@@ -350,6 +353,7 @@ const AdminGroups = () => {
           </div>
         </AdminModal>
       )}
+      {Dialog}
     </div>
   );
 };

@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import VoucherPrint from "../../components/agent/VoucherPrint";
 import Voucher2Print from "../../components/agent/Voucher2Print";
 import TicketPrint from "../../components/agent/TicketPrint";
+import { FaPlane, FaCalendarAlt, FaBox } from "react-icons/fa";
 
 const Bookings = () => {
   const [searchParams] = useSearchParams();
@@ -83,157 +84,179 @@ const Bookings = () => {
   };
 
   return (
-    <div>
+    <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-gray-800">{pageTitle}</h1>
-        <nav className="text-sm text-gray-500">
-          <Link to="/agent" className="text-primary hover:underline">Home</Link> / {breadcrumb}
-        </nav>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-deepblue flex items-center justify-center shadow-lg shadow-primary/30">
+            <FaPlane className="text-white text-xl" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-primary">{pageTitle}</h1>
+            <p className="text-gray-500 text-sm">Manage your bookings</p>
+          </div>
+        </div>
       </div>
 
       {/* Filter Card */}
-      <div className="bg-white rounded-lg shadow-md mb-6">
-        <form onSubmit={handleFilter} className="p-4" style={{ backgroundColor: "#1d6eed" }}>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-            <div>
-              <label className="block text-sm font-medium text-white mb-1">
-                {bookingType === "PACKAGE" ? "Date From" : "Departure From"}
-              </label>
-              <input type="date" value={filters.dateFrom}
-                onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
-                className="w-full px-3 py-2 rounded border-0 text-sm" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-white mb-1">
-                {bookingType === "PACKAGE" ? "Date To" : "Departure To"}
-              </label>
-              <input type="date" value={filters.dateTo}
-                onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
-                className="w-full px-3 py-2 rounded border-0 text-sm" />
-            </div>
-            {!bookingType && (
-              <div>
-                <label className="block text-sm font-medium text-white mb-1">Status</label>
-                <select value={filters.status}
-                  onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                  className="w-full px-3 py-2 rounded border-0 text-sm">
-                  <option value="all">All</option>
-                  <option value="ON_REQUEST">On Request</option>
-                  <option value="PARTIAL">Partial</option>
-                  <option value="CONFIRMED">Confirm</option>
-                  <option value="CANCELLED">Cancel</option>
-                </select>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-4" style={{ background: "linear-gradient(135deg, #0C446F 0%, #034264 100%)" }}>
+          <form onSubmit={handleFilter}>
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+              <div className="space-y-1">
+                <label className="block text-sm font-medium text-white/90">
+                  {bookingType === "PACKAGE" ? "Date From" : "Departure From"}
+                </label>
+                <input type="date" value={filters.dateFrom}
+                  onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border-0 text-sm focus:ring-2 focus:ring-accent outline-none" />
               </div>
-            )}
-            <div>
-              <button type="submit" className="px-6 py-2 bg-yellow-500 text-white font-bold rounded hover:bg-yellow-600 mt-5">
-                Filter
-              </button>
+              <div className="space-y-1">
+                <label className="block text-sm font-medium text-white/90">
+                  {bookingType === "PACKAGE" ? "Date To" : "Departure To"}
+                </label>
+                <input type="date" value={filters.dateTo}
+                  onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border-0 text-sm focus:ring-2 focus:ring-accent outline-none" />
+              </div>
+              {!bookingType && (
+                <div className="space-y-1">
+                  <label className="block text-sm font-medium text-white/90">Status</label>
+                  <select value={filters.status}
+                    onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border-0 text-sm focus:ring-2 focus:ring-accent outline-none">
+                    <option value="all">All</option>
+                    <option value="ON_REQUEST">On Request</option>
+                    <option value="PARTIAL">Partial</option>
+                    <option value="CONFIRMED">Confirm</option>
+                    <option value="CANCELLED">Cancel</option>
+                  </select>
+                </div>
+              )}
+              <div>
+                <button type="submit" className="w-full px-6 py-2.5 bg-accent text-primary font-bold rounded-xl hover:bg-accent/90 transition-all hover:shadow-lg mt-5">
+                  Filter
+                </button>
+              </div>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
 
         {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-800 text-white">
+            <thead className="bg-gray-50 text-gray-600 border-b border-gray-100">
               <tr>
-                <th className="px-3 py-3 text-left whitespace-nowrap">Sr #</th>
-                <th className="px-3 py-3 text-left whitespace-nowrap">Booking No</th>
-                <th className="px-3 py-3 text-left whitespace-nowrap">
+                <th className="px-5 py-4 text-left font-semibold">Sr #</th>
+                <th className="px-5 py-4 text-left font-semibold">Booking No</th>
+                <th className="px-5 py-4 text-left font-semibold">
                   {bookingType === "PACKAGE" ? "Package" : "Group"}
                 </th>
-                {bookingType === "PACKAGE" && <th className="px-3 py-3 text-left whitespace-nowrap">Room Type</th>}
-                <th className="px-3 py-3 text-left whitespace-nowrap">Passenger</th>
-                <th className="px-3 py-3 text-left whitespace-nowrap">Status</th>
-                <th className="px-3 py-3 text-left whitespace-nowrap">Action</th>
+                {bookingType === "PACKAGE" && <th className="px-5 py-4 text-left font-semibold">Room Type</th>}
+                <th className="px-5 py-4 text-left font-semibold">Passenger</th>
+                <th className="px-5 py-4 text-left font-semibold">Status</th>
+                <th className="px-5 py-4 text-left font-semibold">Action</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan="7" className="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
+                <tr>
+                  <td colSpan="7" className="px-5 py-12 text-center text-gray-400">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-6 h-6 border-2 border-gray-200 border-t-primary rounded-full animate-spin" />
+                      Loading bookings...
+                    </div>
+                  </td>
+                </tr>
               ) : bookings.length === 0 ? (
-                <tr><td colSpan="7" className="px-4 py-8 text-center text-gray-400">No bookings found</td></tr>
+                <tr>
+                  <td colSpan="7" className="px-5 py-12 text-center text-gray-400">
+                    <div className="flex flex-col items-center gap-2">
+                      <FaBox className="text-4xl opacity-30" />
+                      <p>No bookings found</p>
+                    </div>
+                  </td>
+                </tr>
               ) : bookings.map((b, i) => (
-                <tr key={b.id} className={`border-b ${i % 2 === 1 ? "bg-gray-50" : ""}`}>
-                  <td className="px-3 py-3">{i + 1}</td>
-                  <td className="px-3 py-3">
-                    <div className="font-bold text-primary">{b.bookingNo}</div>
+                <tr key={b.id} className={`border-b border-gray-50 hover:bg-gray-50/50 transition-colors ${i % 2 === 1 ? "bg-gray-50/30" : "bg-white"}`}>
+                  <td className="px-5 py-4 text-gray-500 font-medium">{i + 1}</td>
+                  <td className="px-5 py-4">
+                    <div className="font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-lg inline-block text-xs mb-1">{b.bookingNo}</div>
                     {getCategoryBadge(b)}
-                    <div className="text-xs text-gray-500 mt-1">
-                      Created: {format(new Date(b.createdAt), "EEE dd MMM yyyy HH:mm")}
+                    <div className="text-xs text-gray-500 mt-1.5 flex items-center gap-1">
+                      <FaCalendarAlt className="text-gray-400" />
+                      {format(new Date(b.createdAt), "EEE dd MMM yyyy HH:mm")}
                     </div>
                     {b.autoCancelledAt && (
-                      <div className="text-xs text-red-500">
-                        Auto Cancelled on: {format(new Date(b.autoCancelledAt), "EEE dd MMM yyyy HH:mm")}
+                      <div className="text-xs text-red-500 mt-1">
+                        Auto Cancelled: {format(new Date(b.autoCancelledAt), "EEE dd MMM yyyy HH:mm")}
                       </div>
                     )}
-                    {/* Countdown Timer */}
                     {b.status === "ON_REQUEST" && b.expiryTime && (
                       <CountdownTimer expiry={b.expiryTime} />
                     )}
                   </td>
-                  <td className="px-3 py-3">
+                  <td className="px-5 py-4">
                     {bookingType === "PACKAGE" ? (
                       <div>
-                        <div className="font-medium">Package: <b>{b.package?.packageName || "N/A"}</b></div>
-                        <div className="text-xs text-blue-600 font-medium">
-                          AG-{b.packageId} (Dep Date: {b.package?.departureDate ? format(new Date(b.package.departureDate), "yyyy-MM-dd") : "N/A"})
+                        <div className="font-medium text-gray-800">Package: <b>{b.package?.packageName || "N/A"}</b></div>
+                        <div className="text-xs text-blue-600 font-medium mt-0.5">
+                          AG-{b.packageId} (Dep: {b.package?.departureDate ? format(new Date(b.package.departureDate), "yyyy-MM-dd") : "N/A"})
                         </div>
                       </div>
                     ) : (
                       <div>
-                        <div className="text-xs">{b.group?.airline?.name}-{b.group?.sector?.routeDisplay}</div>
-                        <div className="font-bold text-sm">{b.group?.airline?.name}</div>
+                        <div className="text-xs text-gray-500">{b.group?.airline?.name} - {b.group?.sector?.routeDisplay}</div>
+                        <div className="font-bold text-sm text-gray-800">{b.group?.airline?.name}</div>
                         <div className="text-xs text-blue-600">AG - {b.groupId}</div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
+                          <FaPlane className="text-gray-400" />
                           Dep: {b.group?.departureDate ? format(new Date(b.group.departureDate), "EEE dd MMM yyyy") : ""}
                         </div>
                       </div>
                     )}
                   </td>
                   {bookingType === "PACKAGE" && (
-                    <td className="px-3 py-3">
-                      <span className="font-medium" style={{ color: "darkgoldenrod" }}>Room Type: {b.roomType || "N/A"}</span>
+                    <td className="px-5 py-4">
+                      <span className="font-medium text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg text-xs">Room: {b.roomType || "N/A"}</span>
                     </td>
                   )}
-                  <td className="px-3 py-3">
-                    <table className="text-xs border">
-                      <thead className="bg-gray-100">
+                  <td className="px-5 py-4">
+                    <table className="text-xs border border-gray-100 rounded-lg overflow-hidden">
+                      <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-2 py-1">Adults</th>
-                          <th className="px-2 py-1">Child</th>
-                          <th className="px-2 py-1">Infant</th>
-                          <th className="px-2 py-1">Total</th>
+                          <th className="px-2.5 py-2 font-medium">Adults</th>
+                          <th className="px-2.5 py-2 font-medium">Child</th>
+                          <th className="px-2.5 py-2 font-medium">Infant</th>
+                          <th className="px-2.5 py-2 font-medium">Total</th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr>
-                          <td className="px-2 py-1 text-center">{b.adultsCount}</td>
-                          <td className="px-2 py-1 text-center">{b.childrenCount}</td>
-                          <td className="px-2 py-1 text-center">{b.infantsCount}</td>
-                          <td className="px-2 py-1 text-center font-bold">{b.totalSeats}</td>
+                          <td className="px-2.5 py-2 text-center">{b.adultsCount}</td>
+                          <td className="px-2.5 py-2 text-center">{b.childrenCount}</td>
+                          <td className="px-2.5 py-2 text-center">{b.infantsCount}</td>
+                          <td className="px-2.5 py-2 text-center font-bold text-primary">{b.totalSeats}</td>
                         </tr>
                       </tbody>
                     </table>
                   </td>
-                  <td className="px-3 py-3">
+                  <td className="px-5 py-4">
                     {getStatusBadge(b.status)}
                     {b.bookingType === "PACKAGE" && b.status !== "CANCELLED" && (
-                      <div className="mt-1 space-y-1">
-                        <button onClick={() => handlePrint(b, "voucher1")} className="block w-full text-xs px-2 py-1 bg-blue-500 text-white rounded text-center hover:bg-blue-600">📋 Voucher</button>
-                        <button onClick={() => handlePrint(b, "voucher2")} className="block w-full text-xs px-2 py-1 bg-yellow-500 text-white rounded text-center hover:bg-yellow-600">📄 Voucher 2</button>
+                      <div className="mt-2 space-y-1.5">
+                        <button onClick={() => handlePrint(b, "voucher1")} className="block w-full text-xs px-2.5 py-1.5 bg-blue-500 text-white rounded-lg text-center hover:bg-blue-600 transition-all">Voucher</button>
+                        <button onClick={() => handlePrint(b, "voucher2")} className="block w-full text-xs px-2.5 py-1.5 bg-amber-500 text-white rounded-lg text-center hover:bg-amber-600 transition-all">Voucher 2</button>
                       </div>
                     )}
                     {b.bookingType === "AIRLINE" && b.status !== "CANCELLED" && (
-                      <div className="mt-1">
-                        <button onClick={() => handlePrint(b, "ticket")} className="block w-full text-xs px-2 py-1 bg-red-500 text-white rounded text-center hover:bg-red-600">🎫 Print Ticket</button>
+                      <div className="mt-2">
+                        <button onClick={() => handlePrint(b, "ticket")} className="block w-full text-xs px-2.5 py-1.5 bg-red-500 text-white rounded-lg text-center hover:bg-red-600 transition-all">Print Ticket</button>
                       </div>
                     )}
                   </td>
-                  <td className="px-3 py-3">
-                    <Link to={`/agent/bookings/${b.id}`} className="px-3 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600">
+                  <td className="px-5 py-4">
+                    <Link to={`/agent/bookings/${b.id}`} className="px-3.5 py-1.5 bg-emerald-500 text-white text-xs font-medium rounded-lg hover:bg-emerald-600 transition-all hover:shadow-md inline-block">
                       {b.bookingType === "PACKAGE" ? "Details" : "View"}
                     </Link>
                   </td>
@@ -244,12 +267,12 @@ const Bookings = () => {
         </div>
 
         {/* Pagination info */}
-        <div className="px-4 py-3 border-t text-sm text-gray-500 flex justify-between items-center">
-          <span>Showing {bookings.length} entries</span>
+        <div className="px-5 py-4 border-t border-gray-100 text-sm text-gray-500 flex justify-between items-center">
+          <span>Showing <span className="font-semibold text-primary">{bookings.length}</span> entries</span>
           <div className="flex gap-2">
-            <button className="px-3 py-1 border rounded text-gray-400">Previous</button>
-            <button className="px-3 py-1 bg-blue-500 text-white rounded">1</button>
-            <button className="px-3 py-1 border rounded text-gray-400">Next</button>
+            <button className="px-3 py-1.5 border border-gray-200 rounded-lg text-gray-400 hover:bg-gray-50 transition-all">Previous</button>
+            <button className="px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all">1</button>
+            <button className="px-3 py-1.5 border border-gray-200 rounded-lg text-gray-400 hover:bg-gray-50 transition-all">Next</button>
           </div>
         </div>
       </div>

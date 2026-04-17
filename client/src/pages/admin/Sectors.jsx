@@ -3,6 +3,7 @@ import { adminAPI } from "../../services/api";
 import toast from "react-hot-toast";
 import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import AdminModal from "../../components/admin/AdminModal";
+import { useConfirm } from "../../components/common/ConfirmDialog";
 
 const emptyForm = { origin: "", destination: "", routeDisplay: "" };
 
@@ -13,6 +14,7 @@ const Sectors = () => {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
+  const { confirm, Dialog } = useConfirm();
 
   useEffect(() => { load(); }, []);
 
@@ -66,13 +68,14 @@ const Sectors = () => {
   };
 
   const handleDelete = async (id, name) => {
-    if (!confirm(`Delete sector "${name}"?`)) return;
+    const ok = await confirm({ title: "Delete Sector", message: `Delete sector "${name}"? This cannot be undone. Sectors with active groups cannot be deleted.` });
+    if (!ok) return;
     try {
       await adminAPI.deleteSector(id);
       toast.success("Sector deleted");
       load();
-    } catch {
-      toast.error("Cannot delete - sector may have groups");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Cannot delete — sector may have active groups");
     }
   };
 
@@ -152,6 +155,7 @@ const Sectors = () => {
           </div>
         </AdminModal>
       )}
+      {Dialog}
     </div>
   );
 };

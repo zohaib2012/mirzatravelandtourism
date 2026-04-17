@@ -3,6 +3,7 @@ import { adminAPI } from "../../services/api";
 import toast from "react-hot-toast";
 import { FaPlus, FaEdit, FaTrash, FaCheckCircle } from "react-icons/fa";
 import AdminModal from "../../components/admin/AdminModal";
+import { useConfirm } from "../../components/common/ConfirmDialog";
 
 const emptyForm = { name: "", description: "", logoUrl: "" };
 
@@ -13,6 +14,7 @@ const Authorizations = () => {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
+  const { confirm, Dialog } = useConfirm();
 
   useEffect(() => { load(); }, []);
 
@@ -56,7 +58,8 @@ const Authorizations = () => {
   };
 
   const handleDelete = async (id, name) => {
-    if (!confirm(`Delete "${name}"?`)) return;
+    const ok = await confirm({ title: "Delete Authorization", message: `Delete "${name}"? This action cannot be undone.` });
+    if (!ok) return;
     try {
       await adminAPI.deleteAuthorization(id);
       toast.success("Authorization deleted");
@@ -126,6 +129,7 @@ const Authorizations = () => {
           </div>
         </AdminModal>
       )}
+      {Dialog}
     </div>
   );
 };

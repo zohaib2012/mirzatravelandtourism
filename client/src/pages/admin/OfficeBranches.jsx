@@ -3,6 +3,7 @@ import { adminAPI } from "../../services/api";
 import toast from "react-hot-toast";
 import { FaPlus, FaEdit, FaTrash, FaMapMarkerAlt, FaStar } from "react-icons/fa";
 import AdminModal from "../../components/admin/AdminModal";
+import { useConfirm } from "../../components/common/ConfirmDialog";
 
 const emptyForm = { city: "", address: "", phone: "", isHead: false, imageUrl: "" };
 
@@ -13,6 +14,7 @@ const OfficeBranches = () => {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
+  const { confirm, Dialog } = useConfirm();
 
   useEffect(() => { load(); }, []);
 
@@ -56,7 +58,8 @@ const OfficeBranches = () => {
   };
 
   const handleDelete = async (id, city) => {
-    if (!confirm(`Delete "${city}" branch?`)) return;
+    const ok = await confirm({ title: "Delete Branch", message: `Delete "${city}" branch? This action cannot be undone.` });
+    if (!ok) return;
     try {
       await adminAPI.deleteBranch(id);
       toast.success("Branch deleted");
@@ -148,6 +151,7 @@ const OfficeBranches = () => {
           </div>
         </AdminModal>
       )}
+      {Dialog}
     </div>
   );
 };

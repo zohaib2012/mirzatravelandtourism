@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { paymentAPI } from "../../services/api";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
+import { useConfirm } from "../../components/common/ConfirmDialog";
 
 const Payments = () => {
   const [payments, setPayments] = useState([]);
@@ -19,6 +20,7 @@ const Payments = () => {
   });
   const [receiptFile, setReceiptFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const { confirm, Dialog } = useConfirm();
 
   // Filter form
   const [filters, setFilters] = useState({
@@ -49,7 +51,8 @@ const Payments = () => {
 
   const handleSubmitPayment = async (e) => {
     e.preventDefault();
-    if (!window.confirm("Do you really want to submit this Record?")) return;
+    const ok = await confirm({ title: "Submit Payment", message: "Are you sure you want to submit this payment record? This action cannot be undone.", confirmLabel: "Submit", confirmColor: "blue" });
+    if (!ok) return;
 
     setSubmitting(true);
     try {
@@ -216,6 +219,7 @@ const Payments = () => {
           <span className="font-bold">Total: PKR: {totalAmount.toLocaleString()}</span>
         </div>
       </div>
+      {Dialog}
     </div>
   );
 };

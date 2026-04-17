@@ -3,6 +3,7 @@ import { adminAPI } from "../../services/api";
 import toast from "react-hot-toast";
 import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import AdminModal from "../../components/admin/AdminModal";
+import { useConfirm } from "../../components/common/ConfirmDialog";
 
 const emptyForm = { name: "", adultBuyRate: "", adultSellRate: "", childBuyRate: "", childSellRate: "" };
 
@@ -13,6 +14,7 @@ const VisaTypes = () => {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
+  const { confirm, Dialog } = useConfirm();
 
   useEffect(() => { load(); }, []);
 
@@ -60,7 +62,8 @@ const VisaTypes = () => {
   };
 
   const handleDelete = async (id, name) => {
-    if (!confirm(`Delete visa type "${name}"?`)) return;
+    const ok = await confirm({ title: "Delete Visa Type", message: `Delete visa type "${name}"? This action cannot be undone.` });
+    if (!ok) return;
     try {
       await adminAPI.deleteVisaType(id);
       toast.success("Visa type deleted");
@@ -143,6 +146,7 @@ const VisaTypes = () => {
           </div>
         </AdminModal>
       )}
+      {Dialog}
     </div>
   );
 };

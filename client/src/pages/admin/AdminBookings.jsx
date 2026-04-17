@@ -4,6 +4,7 @@ import { adminAPI } from "../../services/api";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import { FaSearch } from "react-icons/fa";
+import { useConfirm } from "../../components/common/ConfirmDialog";
 
 const statusColors = {
   ON_REQUEST: "bg-yellow-100 text-yellow-800",
@@ -19,6 +20,7 @@ const AdminBookings = () => {
     status: "",
     bookingType: "",
   });
+  const { confirm, Dialog } = useConfirm();
 
   useEffect(() => { load(); }, []);
 
@@ -38,7 +40,8 @@ const AdminBookings = () => {
   };
 
   const updateStatus = async (id, status) => {
-    if (!confirm(`Change booking status to ${status}?`)) return;
+    const ok = await confirm({ title: "Update Booking Status", message: `Change booking status to "${status}"?`, confirmLabel: "Yes, Update", confirmColor: "blue" });
+    if (!ok) return;
     try {
       await adminAPI.updateBookingStatus(id, { status });
       toast.success("Booking status updated!");
@@ -153,6 +156,7 @@ const AdminBookings = () => {
           Total: {bookings.length} bookings
         </div>
       </div>
+      {Dialog}
     </div>
   );
 };

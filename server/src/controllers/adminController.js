@@ -249,29 +249,37 @@ export const updateVisaType = async (req, res) => {
 // CRUD Transport
 export const createTransport = async (req, res) => {
   try {
-    const data = { ...req.body };
-    if (data.buyRate) data.buyRate = parseFloat(data.buyRate);
-    if (data.sellRate) data.sellRate = parseFloat(data.sellRate);
-
+    const { vehicleType, name, route, buyRate, sellRate } = req.body;
+    const data = {
+      vehicleType: vehicleType || name || "",
+      route: route || null,
+      buyRate: buyRate ? parseFloat(buyRate) : null,
+      sellRate: sellRate ? parseFloat(sellRate) : null,
+    };
     const transport = await prisma.transport.create({ data });
     res.status(201).json({ message: "Transport created", transport });
   } catch (error) {
+    console.error("Create transport error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
 
 export const updateTransport = async (req, res) => {
   try {
-    const data = { ...req.body };
-    if (data.buyRate) data.buyRate = parseFloat(data.buyRate);
-    if (data.sellRate) data.sellRate = parseFloat(data.sellRate);
-
+    const { vehicleType, name, route, buyRate, sellRate } = req.body;
+    const data = {
+      vehicleType: vehicleType || name || "",
+      route: route || null,
+      buyRate: buyRate ? parseFloat(buyRate) : null,
+      sellRate: sellRate ? parseFloat(sellRate) : null,
+    };
     const transport = await prisma.transport.update({
       where: { id: parseInt(req.params.id) },
       data,
     });
     res.json({ message: "Transport updated", transport });
   } catch (error) {
+    console.error("Update transport error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -319,21 +327,39 @@ export const getOfficeBranches = async (req, res) => {
 
 export const createOfficeBranch = async (req, res) => {
   try {
-    const branch = await prisma.officeBranch.create({ data: req.body });
+    const { city, address, phone, isHead, imageUrl, name } = req.body;
+    const data = {
+      name: name || city || "",
+      city: city || "",
+      address: address || "",
+      imageUrl: imageUrl || null,
+      isHead: isHead === true || isHead === "true",
+    };
+    const branch = await prisma.officeBranch.create({ data });
     res.status(201).json({ message: "Branch created", branch });
   } catch (error) {
+    console.error("Create branch error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
 
 export const updateOfficeBranch = async (req, res) => {
   try {
+    const { city, address, phone, isHead, imageUrl, name } = req.body;
+    const data = {
+      name: name || city || "",
+      city: city || "",
+      address: address || "",
+      imageUrl: imageUrl || null,
+      isHead: isHead === true || isHead === "true",
+    };
     const branch = await prisma.officeBranch.update({
       where: { id: parseInt(req.params.id) },
-      data: req.body,
+      data,
     });
     res.json({ message: "Branch updated", branch });
   } catch (error) {
+    console.error("Update branch error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -435,7 +461,7 @@ export const deleteVisaType = async (req, res) => {
 // Get Transports
 export const getTransports = async (req, res) => {
   try {
-    const transports = await prisma.transport.findMany({ where: { isActive: true }, orderBy: { name: "asc" } });
+    const transports = await prisma.transport.findMany({ where: { isActive: true }, orderBy: { vehicleType: "asc" } });
     res.json(transports);
   } catch {
     res.status(500).json({ message: "Server error" });

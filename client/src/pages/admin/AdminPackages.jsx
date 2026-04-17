@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import toast from "react-hot-toast";
 import { FaPlus, FaEdit, FaTrash, FaBox } from "react-icons/fa";
 import AdminModal from "../../components/admin/AdminModal";
+import { useConfirm } from "../../components/common/ConfirmDialog";
 
 const emptyForm = {
   packageName: "", groupId: "", numDays: "", availableSeats: "",
@@ -19,6 +20,7 @@ const AdminPackages = () => {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
+  const { confirm, Dialog } = useConfirm();
 
   useEffect(() => { loadAll(); }, []);
 
@@ -79,7 +81,8 @@ const AdminPackages = () => {
   };
 
   const handleDelete = async (id, name) => {
-    if (!confirm(`Deactivate package "${name}"?`)) return;
+    const ok = await confirm({ title: "Deactivate Package", message: `Deactivate package "${name}"? It will no longer be visible to agents.`, confirmLabel: "Deactivate" });
+    if (!ok) return;
     try {
       await adminAPI.deletePackage(id);
       toast.success("Package deactivated");
@@ -243,6 +246,7 @@ const AdminPackages = () => {
           </div>
         </AdminModal>
       )}
+      {Dialog}
     </div>
   );
 };

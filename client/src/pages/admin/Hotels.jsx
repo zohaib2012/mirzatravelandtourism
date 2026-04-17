@@ -4,6 +4,7 @@ import { packageAPI } from "../../services/api";
 import toast from "react-hot-toast";
 import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import AdminModal from "../../components/admin/AdminModal";
+import { useConfirm } from "../../components/common/ConfirmDialog";
 
 const emptyForm = {
   name: "", city: "MAKKAH", starRating: "5", distance: "",
@@ -18,6 +19,7 @@ const Hotels = () => {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
+  const { confirm, Dialog } = useConfirm();
 
   useEffect(() => { load(); }, [cityFilter]);
 
@@ -69,7 +71,8 @@ const Hotels = () => {
   };
 
   const handleDelete = async (id, name) => {
-    if (!confirm(`Deactivate hotel "${name}"?`)) return;
+    const ok = await confirm({ title: "Deactivate Hotel", message: `Deactivate hotel "${name}"? It will be removed from the active list.`, confirmLabel: "Deactivate" });
+    if (!ok) return;
     try {
       await adminAPI.deleteHotel(id);
       toast.success("Hotel deactivated");
@@ -196,6 +199,7 @@ const Hotels = () => {
           </div>
         </AdminModal>
       )}
+      {Dialog}
     </div>
   );
 };

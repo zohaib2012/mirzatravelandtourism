@@ -321,15 +321,11 @@ const FlightCard = ({ group, onBookNow, onCopy }) => {
 
       {/* Body */}
       <div className="p-4 flex flex-col lg:flex-row gap-4">
-        {/* Airline Logo + Name */}
+        {/* Airline Name */}
         <div className="lg:w-[15%] flex flex-col items-center justify-center">
-          {group.airline?.logoUrl ? (
-            <img src={group.airline.logoUrl} alt={group.airline.name} className="h-12 object-contain mb-1" />
-          ) : (
-            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xs mb-1">
-              {group.airline?.name?.split(" ").map((w) => w[0]).join("").substring(0, 3)}
-            </div>
-          )}
+          <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xs mb-1">
+            {group.airline?.name?.split(" ").map((w) => w[0]).join("").substring(0, 3)}
+          </div>
           <span className="text-xs font-bold text-primary text-center">{group.airline?.name}</span>
         </div>
 
