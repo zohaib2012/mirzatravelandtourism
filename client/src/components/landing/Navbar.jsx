@@ -23,11 +23,16 @@ const Navbar = () => {
   };
 
   const products = [
-    { label: "One Way Groups", to: "/groups?category=UAE_ONE_WAY", icon: FaPlane },
-    { label: "Umrah Groups", to: "/groups?category=UMRAH", icon: FaKaaba },
-    { label: "Umrah Calculator", to: "/calculator", icon: FaCalculator },
-    { label: "Makkah Hotels", to: "/hotel-rates/makkah", icon: FaHotel },
-    { label: "Madina Hotels", to: "/hotel-rates/madina", icon: FaHotel },
+    // { label: "One Way Groups", to: "/groups?category=UAE_ONE_WAY", icon: FaPlane },
+    // { label: "Umrah Groups", to: "/groups?category=UMRAH", icon: FaKaaba },
+    // { label: "Umrah Calculator", to: "/calculator", icon: FaCalculator },
+    // { label: "Makkah Hotels", to: "/hotel-rates/makkah", icon: FaHotel },
+    // { label: "Madina Hotels", to: "/hotel-rates/madina", icon: FaHotel },
+       { label: "One Way Groups", to: "/", icon: FaPlane },
+    { label: "Umrah Groups", to: "/", icon: FaKaaba },
+    { label: "Umrah Calculator", to: "/", icon: FaCalculator },
+    { label: "Makkah Hotels", to: "/", icon: FaHotel },
+    { label: "Madina Hotels", to: "/", icon: FaHotel },
   ];
 
   return (
