@@ -120,7 +120,7 @@ const Hotels = () => {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="11" className="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
+              <tr><td colSpan="11" className="px-4 py-10 text-center"><div className="flex items-center justify-center gap-2 text-gray-500"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /><span className="text-sm">Loading...</span></div></td></tr>
             ) : hotels.length === 0 ? (
               <tr><td colSpan="11" className="px-4 py-8 text-center text-gray-400">No hotels found</td></tr>
             ) : hotels.map((h, i) => (

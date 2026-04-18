@@ -80,7 +80,7 @@ const OfficeBranches = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {loading ? (
-          <div className="col-span-3 text-center py-8 text-gray-400">Loading...</div>
+          <div className="col-span-3 py-10 text-center"><div className="flex items-center justify-center gap-2 text-gray-500"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /><span className="text-sm">Loading...</span></div></div>
         ) : branches.length === 0 ? (
           <div className="col-span-3 text-center py-8 text-gray-400">No branches added yet</div>
         ) : branches.map((b) => (
