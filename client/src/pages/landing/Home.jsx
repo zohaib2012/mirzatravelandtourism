@@ -249,7 +249,7 @@ const Home = () => {
                   {forgotOpen && <ForgotPasswordModal onClose={() => setForgotOpen(false)} />}
                   <div className="flex items-center justify-center gap-2 text-gray-500 text-xs pt-1">
                     <FaHeadset className="text-accent text-sm" />
-                    Helpline: <a href="tel:+923000381533" className="font-semibold text-primary hover:text-accent">+92 300 038 1533</a>
+                    Helpline: <a href="tel:+923000381533" className="font-semibold text-primary hover:text-accent">03197810226</a>
                   </div>
                 </div>
               </div>

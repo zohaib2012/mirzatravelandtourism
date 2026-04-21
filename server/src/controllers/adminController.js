@@ -1,4 +1,5 @@
 import prisma from "../config/db.js";
+import bcrypt from "bcryptjs";
 
 // Dashboard stats
 export const getDashboardStats = async (req, res) => {
@@ -101,8 +102,25 @@ export const getAirlines = async (req, res) => {
 
 export const createAirline = async (req, res) => {
   try {
+    console.log("=== [createAirline] ===");
+    console.log("req.file:", req.file);
+    console.log("req.body:", req.body);
     const { name, code, logoUrl } = req.body;
-    const airline = await prisma.airline.create({ data: { name, code: code || null, logoUrl: logoUrl || null } });
+    let logo = logoUrl || null;
+    if (req.file) {
+      console.log("File detected:", req.file.originalname, req.file.size, req.file.mimetype);
+      try {
+        const { uploadToCloudinary } = await import("../middleware/upload.js");
+        logo = await uploadToCloudinary(req.file.buffer, "mirza-airlines");
+        console.log("Uploaded logo URL:", logo);
+      } catch (uploadErr) {
+        console.error("Logo upload failed:", uploadErr.message, uploadErr.stack);
+      }
+    } else {
+      console.log("No file uploaded");
+    }
+    const airline = await prisma.airline.create({ data: { name, code: code || null, logoUrl: logo } });
+    console.log("Airline created with logoUrl:", logo);
     res.status(201).json({ message: "Airline created", airline });
   } catch (error) {
     console.error("Create airline error:", error);
@@ -113,9 +131,18 @@ export const createAirline = async (req, res) => {
 export const updateAirline = async (req, res) => {
   try {
     const { name, code, logoUrl } = req.body;
+    let logo = logoUrl;
+    if (req.file) {
+      try {
+        const { uploadToCloudinary } = await import("../middleware/upload.js");
+        logo = await uploadToCloudinary(req.file.buffer, "mirza-airlines");
+      } catch (uploadErr) {
+        console.error("Logo upload failed:", uploadErr.message);
+      }
+    }
     const airline = await prisma.airline.update({
       where: { id: parseInt(req.params.id) },
-      data: { name, code: code || null, logoUrl: logoUrl || null },
+      data: { name, code: code || null, logoUrl: logo || null },
     });
     res.json({ message: "Airline updated", airline });
   } catch (error) {
@@ -1023,5 +1050,65 @@ export const getReports = async (req, res) => {
   } catch (err) {
     console.error("Reports error:", err);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const updatePassword = async (req, res) => {
+  try {
+    console.log("[updatePassword] req.user:", req.user);
+    const { currentPassword, newPassword } = req.body;
+    const adminId = req.user.id;
+
+    console.log("[updatePassword] adminId:", adminId, "newPassword:", !!newPassword);
+
+    if (!newPassword) {
+      return res.status(400).json({ message: "New password is required" });
+    }
+
+    const admin = await prisma.user.findUnique({
+      where: { id: adminId },
+    });
+
+    console.log("[updatePassword] admin found:", !!admin, "has password:", !!admin?.password);
+
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+
+    if (admin.password) {
+      if (!currentPassword) {
+        return res.status(400).json({ message: "Current password is required" });
+      }
+      const isMatch = await bcrypt.compare(currentPassword, admin.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: "Current password is incorrect" });
+      }
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    await prisma.user.update({
+      where: { id: adminId },
+      data: { password: hashedPassword },
+    });
+
+    res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    console.error("Update password error:", err);
+    res.status(500).json({ message: "Server error", detail: err.message });
+  }
+};
+
+export const uploadFile = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file provided" });
+    }
+    const { uploadToCloudinary } = await import("../middleware/upload.js");
+    const url = await uploadToCloudinary(req.file.buffer, "mirza-uploads");
+    res.json({ url });
+  } catch (error) {
+    console.error("Upload error:", error);
+    res.status(500).json({ message: "Upload failed" });
   }
 };

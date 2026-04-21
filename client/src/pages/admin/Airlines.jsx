@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { adminAPI } from "../../services/api";
 import toast from "react-hot-toast";
-import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaUpload } from "react-icons/fa";
 import AdminModal from "../../components/admin/AdminModal";
 import { useConfirm } from "../../components/common/ConfirmDialog";
 
@@ -10,10 +10,14 @@ const emptyForm = { name: "", code: "", logoUrl: "" };
 const Airlines = () => {
   const [airlines, setAirlines] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [modal, setModal] = useState(null); // null | "add" | "edit"
+  const [modal, setModal] = useState(null);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState(null);
+  const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const fileInputRef = useRef(null);
   const { confirm, Dialog } = useConfirm();
 
   useEffect(() => { load(); }, []);
@@ -30,23 +34,54 @@ const Airlines = () => {
     }
   };
 
-  const openAdd = () => { setForm(emptyForm); setEditing(null); setModal("form"); };
-  const openEdit = (a) => { setForm({ name: a.name, code: a.code || "", logoUrl: a.logoUrl || "" }); setEditing(a); setModal("form"); };
+  const openAdd = () => { setForm(emptyForm); setLogoFile(null); setLogoPreview(null); setEditing(null); setModal("form"); };
+  const openEdit = (a) => { 
+    setForm({ name: a.name, code: a.code || "", logoUrl: a.logoUrl || "" }); 
+    setLogoFile(null); 
+    setLogoPreview(a.logoUrl || null);
+    setEditing(a); 
+    setModal("form"); 
+  };
+
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setLogoFile(file);
+      setLogoPreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleSave = async () => {
     if (!form.name.trim()) return toast.error("Airline name is required");
     setSubmitting(true);
     try {
+      const formData = new FormData();
+      formData.append("name", form.name);
+      formData.append("code", form.code || "");
+      if (logoFile) {
+        console.log("Uploading logo file:", logoFile.name, logoFile.size);
+        formData.append("logo", logoFile);
+      }
+      if (form.logoUrl) {
+        console.log("Using logo URL:", form.logoUrl);
+        formData.append("logoUrl", form.logoUrl);
+      }
+
+      for (let [key, value] of formData.entries()) {
+        console.log(`FormData ${key}:`, value);
+      }
+
       if (editing) {
-        await adminAPI.updateAirline(editing.id, form);
+        await adminAPI.updateAirline(editing.id, formData);
         toast.success("Airline updated!");
       } else {
-        await adminAPI.createAirline(form);
+        await adminAPI.createAirline(formData);
         toast.success("Airline added!");
       }
       setModal(null);
       load();
     } catch (err) {
+      console.error("Save error:", err);
       toast.error(err.response?.data?.message || "Save failed");
     } finally {
       setSubmitting(false);
@@ -141,13 +176,26 @@ const Airlines = () => {
                 placeholder="e.g. PK" maxLength={3} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Logo URL</label>
-              <input value={form.logoUrl} onChange={(e) => setForm({ ...form, logoUrl: e.target.value })}
+              <label className="block text-sm font-medium text-gray-700 mb-1">Airline Logo</label>
+              <input type="file" accept="image/*" onChange={handleLogoChange}
+                ref={fileInputRef}
+                className="hidden" />
+              <div className="flex items-center gap-3">
+                <button type="button" onClick={() => fileInputRef.current?.click()}
+                  className="px-4 py-2 bg-gray-100 border text-sm rounded-lg hover:bg-gray-200 flex items-center gap-2">
+                  <FaUpload /> Choose File
+                </button>
+                {logoFile && <span className="text-sm text-gray-500 truncate">{logoFile.name}</span>}
+              </div>
+              {logoPreview && (
+                <img src={logoPreview} alt="preview" className="mt-2 h-16 object-contain border rounded" />
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Or Paste Logo URL</label>
+              <input value={form.logoUrl} onChange={(e) => { setForm({ ...form, logoUrl: e.target.value }); setLogoFile(null); }}
                 className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
                 placeholder="https://..." />
-              {form.logoUrl && (
-                <img src={form.logoUrl} alt="preview" className="mt-2 h-12 object-contain border rounded" onError={(e) => e.target.style.display = "none"} />
-              )}
             </div>
           </div>
         </AdminModal>

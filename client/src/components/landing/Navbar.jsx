@@ -42,9 +42,9 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-4 flex justify-between items-center">
           <span className="opacity-80">Welcome to Mirza Travel & Tourism — Pakistan's Premier Travel Agency</span>
           <div className="flex items-center gap-4 opacity-90">
-            <a href="tel:+923000381533" className="hover:text-accent transition-colors">+92 300 038 1533</a>
+            <a href="tel:+923000381533" className="hover:text-accent transition-colors">03197810226</a>
             <span className="text-white/40">|</span>
-            <a href="mailto:support@mirzatravel.pk" className="hover:text-accent transition-colors">support@mirzatravel.pk</a>
+            <a href="mailto:Smirzatravel.group@outlook.com" className="hover:text-accent transition-colors">Smirzatravel.group@outlook.com</a>
           </div>
         </div>
       </div>

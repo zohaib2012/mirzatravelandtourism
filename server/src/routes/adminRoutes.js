@@ -1,6 +1,7 @@
 import { Router } from "express";
 import * as admin from "../controllers/adminController.js";
 import { authenticate, authorizeAdmin } from "../middleware/auth.js";
+import upload from "../middleware/upload.js";
 
 const router = Router();
 
@@ -16,9 +17,12 @@ router.get("/ledger/:agentId", admin.getAgentLedger);
 
 // Airlines
 router.get("/airlines", admin.getAirlines);
-router.post("/airlines", admin.createAirline);
-router.put("/airlines/:id", admin.updateAirline);
+router.post("/airlines", upload.single("logo"), admin.createAirline);
+router.put("/airlines/:id", upload.single("logo"), admin.updateAirline);
 router.delete("/airlines/:id", admin.deleteAirline);
+
+// Upload
+router.post("/upload", upload.single("file"), admin.uploadFile);
 
 // Sectors
 router.get("/sectors", admin.getSectors);
@@ -91,6 +95,9 @@ router.delete("/packages/:id", admin.deletePackage);
 // Settings
 router.get("/settings", admin.getCompanySettings);
 router.put("/settings", admin.updateCompanySettings);
+
+// Password
+router.put("/password", admin.updatePassword);
 
 // Reports
 router.get("/reports", admin.getReports);

@@ -6,27 +6,54 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("Seeding database...\n");
 
-  // 1. Create Admin User
-  const adminPassword = await bcrypt.hash("Admin@123", 12);
-  const admin = await prisma.user.upsert({
-    where: { email: "admin@mirzatravel.pk" },
-    update: {},
-    create: {
-      agentCode: "0001",
-      agencyName: "Mirza Travel & Tourism",
-      contactPerson: "Admin",
-      email: "admin@mirzatravel.pk",
-      password: adminPassword,
-      phone: "+923000000000",
-      city: "Faisalabad",
-      country: "Pakistan",
-      role: "ADMIN",
-      status: "ACTIVE",
-    },
-  });
-  console.log("Admin created:", admin.email);
+  // 1. Create Admin User (skip if exists with agentCode 0001)
+  let admin = await prisma.user.findUnique({ where: { email: "zohaib.khaleed@gmail.com" } });
+  if (!admin) {
+    const existingWithCode = await prisma.user.findUnique({ where: { agentCode: "0001" } });
+    const adminPassword = await bcrypt.hash("Admin@123", 12);
+    admin = await prisma.user.create({
+      data: {
+        agentCode: existingWithCode ? "0003" : "0001",
+        agencyName: "Mirza Travel & Tourism",
+        contactPerson: "Admin",
+        email: "zohaib.khaleed@gmail.com",
+        password: adminPassword,
+        phone: "+923000000000",
+        city: "Gujrat",
+        country: "Pakistan",
+        role: "ADMIN",
+        status: "ACTIVE",
+      },
+    });
+    console.log("Admin created:", admin.email);
+  } else {
+    console.log("Admin already exists:", admin.email);
+  }
 
-  // 2. Create Demo Agent
+  // 2. Create 2nd Admin (skip if exists with different code)
+  const existingAdmin2 = await prisma.user.findUnique({ where: { email: "admin@mirzatravel.pk" } });
+  if (!existingAdmin2) {
+    const admin2Password = await bcrypt.hash("Admin@123", 12);
+    const admin2 = await prisma.user.create({
+      data: {
+        agentCode: "0002",
+        agencyName: "Mirza Travel & Tourism",
+        contactPerson: "2nd Admin",
+        email: "admin@mirzatravel.pk",
+        password: admin2Password,
+        phone: "+923000000001",
+        city: "Gujrat",
+        country: "Pakistan",
+        role: "ADMIN",
+        status: "ACTIVE",
+      },
+    });
+    console.log("2nd Admin created:", admin2.email);
+  } else {
+    console.log("2nd Admin already exists:", existingAdmin2.email);
+  }
+
+  // 3. Create Demo Agent
   const agentPassword = await bcrypt.hash("Agent@123", 12);
   const agent = await prisma.user.upsert({
     where: { email: "demo@agent.pk" },
@@ -203,10 +230,10 @@ async function main() {
     data: {
       companyName: "Mirza Travel & Tourism",
       tagline: "Your Trusted Travel Partner",
-      email: "support@mirzatravel.pk",
+      email: "Smirzatravel.group@outlook.com",
       phone: "+92 3000381533",
       whatsapp: "+923000381533",
-      address: "Az Mall, Kohenoor Town, Faisalabad, Punjab, Pakistan",
+      address: "Office no 10 Ramtli Chowk butt plaza opposite Qand fishan sweets GT road Gujrat",
     },
   });
   console.log("Company settings created");
@@ -248,7 +275,7 @@ async function main() {
 
   console.log("\nSeeding complete!");
   console.log("\n--- Login Credentials ---");
-  console.log("Admin:  admin@mirzatravel.pk / Admin@123");
+  // console.log("Admin:  admin@mirzatravel.pk / Admin@123");
   console.log("Agent:  Code: 5190 | demo@agent.pk / Agent@123");
 }
 

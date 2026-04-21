@@ -2,6 +2,13 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import prisma from "../config/db.js";
 import { generateAgentCode } from "../utils/helpers.js";
+import { sendOTPEmail } from "../utils/otpEmail.js";
+
+const otpStore = new Map();
+
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
 
 const generateTokens = (userId, role) => {
   const accessToken = jwt.sign({ userId, role }, process.env.JWT_SECRET, {
@@ -61,13 +68,6 @@ export const login = async (req, res) => {
   try {
     const { agentCode, email, password } = req.body;
 
-    const where = {};
-    if (agentCode) where.agentCode = agentCode;
-    if (email) where.email = email;
-
-    const user = await prisma.user.findFirst({ where: { AND: [where] } });
-
-    // For admin login, only email + password (no agent code)
     let foundUser = null;
     if (agentCode && email) {
       foundUser = await prisma.user.findFirst({
@@ -187,6 +187,139 @@ export const updateProfile = async (req, res) => {
 
     res.json({ message: "Profile updated", user });
   } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const sendAdminOTP = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password required" });
+    }
+
+    const user = await prisma.user.findFirst({
+      where: { email, role: "ADMIN" },
+    });
+
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    if (user.status !== "ACTIVE") {
+      return res.status(403).json({ message: "Account is not active" });
+    }
+
+    const otp = generateOTP();
+    const expiresAt = Date.now() + 5 * 60 * 1000;
+
+    otpStore.set(email, { otp, expiresAt });
+
+    console.log(`[OTP] Generated for ${email}: ${otp}`);
+
+    const result = await sendOTPEmail(otp);
+    if (!result.success) {
+      console.error("[OTP] Email send failed:", result.error);
+      const isDev = process.env.NODE_ENV !== "production";
+      return res.status(500).json({
+        message: "Failed to send OTP email",
+        ...(isDev && { detail: String(result.error?.message || result.error) }),
+      });
+    }
+
+    res.json({ message: "OTP sent to admin email" });
+  } catch (error) {
+    console.error("Send OTP error:", error);
+    res.status(500).json({ message: "Server error", detail: error.message });
+  }
+};
+
+export const verifyAdminOTP = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({ message: "Email and OTP required" });
+    }
+
+    const storedData = otpStore.get(email);
+
+    if (!storedData) {
+      return res.status(400).json({ message: "OTP not requested or expired" });
+    }
+
+    if (Date.now() > storedData.expiresAt) {
+      otpStore.delete(email);
+      return res.status(400).json({ message: "OTP expired" });
+    }
+
+    if (storedData.otp !== otp) {
+      return res.status(401).json({ message: "Invalid OTP" });
+    }
+
+    otpStore.delete(email);
+
+    const user = await prisma.user.findFirst({
+      where: { email, role: "ADMIN" },
+    });
+
+    const { accessToken, refreshToken } = generateTokens(user.id, user.role);
+
+    res.json({
+      message: "Login successful",
+      user: {
+        id: user.id,
+        agentCode: user.agentCode,
+        agencyName: user.agencyName,
+        contactPerson: user.contactPerson,
+        email: user.email,
+        role: user.role,
+        logoUrl: user.logoUrl,
+      },
+      accessToken,
+      refreshToken,
+    });
+  } catch (error) {
+    console.error("Verify OTP error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const resendAdminOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email required" });
+    }
+
+    const user = await prisma.user.findFirst({
+      where: { email, role: "ADMIN" },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+
+    const otp = generateOTP();
+    const expiresAt = Date.now() + 5 * 60 * 1000;
+
+    otpStore.set(email, { otp, expiresAt });
+
+    const result = await sendOTPEmail(otp);
+    if (!result.success) {
+      return res.status(500).json({ message: "Failed to send OTP email" });
+    }
+
+    res.json({ message: "OTP resent to admin email" });
+  } catch (error) {
+    console.error("Resend OTP error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

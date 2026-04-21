@@ -63,6 +63,7 @@ const menuGroups = [
         ],
       },
       { to: "/admin/settings", icon: FaCog, label: "Settings" },
+      { to: "/admin/update-password", icon: FaShieldAlt, label: "Saved" },
     ],
   },
 ];

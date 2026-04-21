@@ -49,6 +49,7 @@ import OfficeBranches from "./pages/admin/OfficeBranches";
 import Authorizations from "./pages/admin/Authorizations";
 import Deals from "./pages/admin/Deals";
 import Settings from "./pages/admin/Settings";
+import UpdatePassword from "./pages/admin/UpdatePassword";
 import AdminPackages from "./pages/admin/AdminPackages";
 import Reports from "./pages/admin/Reports";
 
@@ -108,6 +109,7 @@ function App() {
             <Route path="authorizations" element={<Authorizations />} />
             <Route path="deals" element={<Deals />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="update-password" element={<UpdatePassword />} />
           </Route>
 
           {/* 404 */}

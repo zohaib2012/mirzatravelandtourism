@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { adminAPI } from "../../services/api";
 import toast from "react-hot-toast";
-import { FaSave } from "react-icons/fa";
+import { FaSave, FaLock } from "react-icons/fa";
 
 const Settings = () => {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     companyName: "", tagline: "", phone: "", email: "", address: "",
     whatsapp: "", facebook: "", instagram: "", logoUrl: "",
@@ -39,10 +41,16 @@ const Settings = () => {
     <div>
       <div className="flex items-center justify-between mb-5">
         <h1 className="text-2xl font-bold text-gray-800">Company Settings</h1>
-        <button onClick={handleSave} disabled={submitting}
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate("/admin/update-password")}
+            className="px-5 py-2 bg-accent text-white rounded-lg flex items-center gap-2 hover:opacity-90">
+            <FaLock /> Saved
+          </button>
+          <button onClick={handleSave} disabled={submitting}
           className="px-5 py-2 bg-primary text-white rounded-lg flex items-center gap-2 hover:opacity-90 disabled:opacity-50">
           <FaSave /> {submitting ? "Saving..." : "Save Settings"}
-        </button>
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

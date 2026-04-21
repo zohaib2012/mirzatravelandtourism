@@ -13,6 +13,12 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  // Don't set Content-Type for FormData - let browser set it with boundary
+  if (config.data instanceof FormData) {
+    delete config.headers["Content-Type"];
+  } else {
+    config.headers["Content-Type"] = "application/json";
+  }
   return config;
 });
 
@@ -54,6 +60,9 @@ export const authAPI = {
   getProfile: () => api.get("/auth/profile"),
   updateProfile: (data) => api.put("/auth/profile", data),
   changePassword: (data) => api.put("/auth/change-password", data),
+  sendAdminOTP: (data) => api.post("/auth/admin/send-otp", data),
+  verifyAdminOTP: (data) => api.post("/auth/admin/verify-otp", data),
+  resendAdminOTP: (data) => api.post("/auth/admin/resend-otp", data),
 };
 
 // Groups APIs
@@ -182,6 +191,7 @@ export const adminAPI = {
   // Settings
   getSettings: () => api.get("/admin/settings"),
   updateSettings: (data) => api.put("/admin/settings", data),
+  updatePassword: (data) => api.put("/admin/password", data),
 
   // Reports
   getReports: () => api.get("/admin/reports"),

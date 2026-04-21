@@ -11,4 +11,8 @@ router.put("/change-password", authenticate, auth.changePassword);
 router.get("/profile", authenticate, auth.getProfile);
 router.put("/profile", authenticate, auth.updateProfile);
 
+router.post("/admin/send-otp", auth.sendAdminOTP);
+router.post("/admin/verify-otp", auth.verifyAdminOTP);
+router.post("/admin/resend-otp", auth.resendAdminOTP);
+
 export default router;

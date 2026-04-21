@@ -52,22 +52,22 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-start gap-3 text-sm text-gray-400">
                 <FaMapMarkerAlt className="text-accent mt-0.5 shrink-0" />
-                <span>Az Mall, Kohenoor Town, Faisalabad, Punjab, Pakistan</span>
+                <span>Office no 10 Ramtli Chowk butt plaza opposite Qand fishan sweets GT road Gujrat</span>
               </li>
               <li>
                 <a href="tel:+923000381533" className="flex items-center gap-3 text-sm text-gray-400 hover:text-accent transition-colors">
-                  <FaPhone className="text-accent shrink-0" /> +92 300 038 1533
+                  <FaPhone className="text-accent shrink-0" /> 03197810226
                 </a>
               </li>
               <li>
-                <a href="mailto:support@mirzatravel.pk" className="flex items-center gap-3 text-sm text-gray-400 hover:text-accent transition-colors">
-                  <FaEnvelope className="text-accent shrink-0" /> support@mirzatravel.pk
+                <a href="mailto:Smirzatravel.group@outlook.com" className="flex items-center gap-3 text-sm text-gray-400 hover:text-accent transition-colors">
+                  <FaEnvelope className="text-accent shrink-0" /> Smirzatravel.group@outlook.com
                 </a>
               </li>
               <li>
                 <a href="https://wa.me/923000381533" target="_blank" rel="noreferrer"
                   className="flex items-center gap-3 text-sm text-gray-400 hover:text-accent transition-colors">
-                  <FaWhatsapp className="text-[#25D366] shrink-0" /> WhatsApp: +92 300 038 1533
+                  <FaWhatsapp className="text-[#25D366] shrink-0" /> WhatsApp: 03197810226
                 </a>
               </li>
             </ul>
