@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { upload, uploadPassport } from "../controllers/uploadController.js";
+import { getUploadSignature } from "../controllers/uploadController.js";
 import { authenticate } from "../middleware/auth.js";
 
 const router = Router();
 
-router.post("/passport", authenticate, upload.single("file"), uploadPassport);
+// Returns signature for direct browser-to-Cloudinary upload
+router.get("/signature", authenticate, getUploadSignature);
 
 export default router;

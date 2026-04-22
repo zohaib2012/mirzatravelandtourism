@@ -86,9 +86,9 @@ export const bookingAPI = {
   updatePassengers: (id, data) => api.put(`/bookings/${id}/passengers`, data),
 };
 
-// Upload APIs
+// Upload — signature only (direct browser-to-Cloudinary upload)
 export const uploadAPI = {
-  passport: (formData) => api.post("/upload/passport", formData),
+  getSignature: () => api.get("/upload/signature"),
 };
 
 // Package APIs

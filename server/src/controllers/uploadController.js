@@ -1,24 +1,26 @@
 import cloudinary from "../config/cloudinary.js";
-import multer from "multer";
 
-const storage = multer.memoryStorage();
-export const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
-
-export const uploadPassport = async (req, res) => {
+// Backend sirf signature generate karta hai (< 100ms)
+// File directly browser se Cloudinary ko jati hai — Vercel bypass
+export const getUploadSignature = (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+    const timestamp = Math.round(Date.now() / 1000);
+    const folder = "mirza-travel/passports";
 
-    const result = await new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        { folder: "mirza-travel/passports", resource_type: "image" },
-        (error, result) => (error ? reject(error) : resolve(result))
-      );
-      stream.end(req.file.buffer);
+    const signature = cloudinary.utils.api_sign_request(
+      { timestamp, folder },
+      process.env.CLOUDINARY_API_SECRET
+    );
+
+    res.json({
+      signature,
+      timestamp,
+      folder,
+      cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+      apiKey: process.env.CLOUDINARY_API_KEY,
     });
-
-    res.json({ url: result.secure_url });
   } catch (error) {
-    console.error("Upload error:", error);
-    res.status(500).json({ message: "Upload failed" });
+    console.error("Signature error:", error);
+    res.status(500).json({ message: "Could not generate upload signature" });
   }
 };

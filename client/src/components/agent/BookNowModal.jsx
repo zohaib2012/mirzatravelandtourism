@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { bookingAPI, uploadAPI } from "../../services/api";
+import { bookingAPI } from "../../services/api";
+import { uploadPassportDirect } from "../../utils/uploadPassport";
 import { FaTimes, FaPlane, FaUpload, FaSpinner } from "react-icons/fa";
 import toast from "react-hot-toast";
 
@@ -33,14 +34,12 @@ const BookNowModal = ({ group, onClose, onSuccess }) => {
   const handlePassportUpload = async (index, side, file) => {
     if (!file) return;
     const uploadingKey = side === "front" ? "uploadingFront" : "uploadingBack";
+    const urlKey = side === "front" ? "passportFrontUrl" : "passportBackUrl";
     updatePassenger(index, uploadingKey, true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const { data } = await uploadAPI.passport(formData);
-      const urlKey = side === "front" ? "passportFrontUrl" : "passportBackUrl";
+      const url = await uploadPassportDirect(file);
       const updated = [...passengers];
-      updated[index] = { ...updated[index], [urlKey]: data.url, [uploadingKey]: false };
+      updated[index] = { ...updated[index], [urlKey]: url, [uploadingKey]: false };
       setPassengers(updated);
       toast.success(`Passport ${side} uploaded`);
     } catch {
