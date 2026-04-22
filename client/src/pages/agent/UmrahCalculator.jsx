@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { packageAPI } from "../../services/api";
 import toast from "react-hot-toast";
-import { FaPlus, FaTrash, FaCalculator } from "react-icons/fa";
+import { FaPlus, FaTrash, FaCalculator, FaPrint } from "react-icons/fa";
 
 const UmrahCalculator = () => {
   const [visaTypes, setVisaTypes] = useState([]);
@@ -103,6 +103,117 @@ const UmrahCalculator = () => {
     return sum + (rate * parseInt(row.nights || 0) * parseInt(row.rooms || 1));
   }, 0);
   const grandTotal = totalVisaCost + totalHotelCost + transportRate;
+
+  const handlePrintVoucher = () => {
+    const visa = visaTypes.find((v) => v.id === parseInt(selectedVisa));
+    const transport = transports.find((t) => t.id === parseInt(selectedTransport));
+    const printDate = new Date().toLocaleDateString("en-PK", { day: "2-digit", month: "long", year: "numeric" });
+
+    const hotelRows_html = hotelRows.map((row, i) => {
+      const hotel = hotels.find((h) => h.id === parseInt(row.hotelId));
+      const rate = hotel ? Number(hotel.doubleRate) || 0 : 0;
+      const cost = rate * parseInt(row.nights || 0) * parseInt(row.rooms || 1);
+      return `<tr>
+        <td style="padding:6px 10px;border:1px solid #ddd">City ${i + 1}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd">${row.city}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd">${hotel ? hotel.name : "-"}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center">${row.rooms}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd">${row.checkin || "-"}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;text-align:center">${row.nights}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd">${row.checkout || "-"}</td>
+        <td style="padding:6px 10px;border:1px solid #ddd;text-align:right">SAR ${cost.toLocaleString()}</td>
+      </tr>`;
+    }).join("");
+
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Umrah Package Voucher</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; color: #1a1a1a; }
+    .header { text-align: center; border-bottom: 3px solid #1B3F6E; padding-bottom: 15px; margin-bottom: 20px; }
+    .header h1 { color: #1B3F6E; margin: 0; font-size: 24px; }
+    .header p { color: #666; margin: 5px 0 0; }
+    .voucher-title { background: linear-gradient(135deg, #f99f24, #EDDE5D); padding: 10px 20px; font-weight: bold; font-size: 16px; color: #1B3F6E; margin-bottom: 20px; border-radius: 4px; }
+    .section { margin-bottom: 20px; }
+    .section-title { background: #1B3F6E; color: white; padding: 6px 12px; font-weight: bold; font-size: 13px; margin-bottom: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: #f5f5f5; padding: 8px 10px; border: 1px solid #ddd; text-align: left; }
+    td { padding: 6px 10px; border: 1px solid #ddd; }
+    .totals { background: #1B3F6E; color: white; padding: 15px 20px; border-radius: 6px; margin-top: 20px; }
+    .totals table { color: white; }
+    .totals td { border-color: rgba(255,255,255,0.2); }
+    .grand-total { font-size: 20px; font-weight: bold; color: #f99f24; }
+    .footer { text-align: center; margin-top: 30px; font-size: 11px; color: #999; border-top: 1px solid #eee; padding-top: 10px; }
+    @media print { body { margin: 15px; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Mirza Travel &amp; Tourism</h1>
+    <p>Umrah Package Voucher &mdash; ${printDate}</p>
+  </div>
+  <div class="voucher-title">Build Your Umrah Package &mdash; Calculation Summary</div>
+
+  <div class="section">
+    <div class="section-title">1. Visa Information</div>
+    <table>
+      <tr><th>Adults</th><th>Infants</th><th>Visa Type</th><th>Adult Rate</th><th>Infant Rate</th><th>Total Visa Cost</th></tr>
+      <tr>
+        <td>${adults}</td>
+        <td>${infants}</td>
+        <td>${visa ? visa.name : "-"}</td>
+        <td>SAR ${visaRates.adultRate.toLocaleString()}</td>
+        <td>SAR ${visaRates.childRate.toLocaleString()}</td>
+        <td><strong>SAR ${totalVisaCost.toLocaleString()}</strong></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">2. Room Type</div>
+    <table><tr><td>${roomType}</td></tr></table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">3. Hotel Selection</div>
+    <table>
+      <thead><tr><th>Plan</th><th>City</th><th>Hotel</th><th>Rooms</th><th>Check-in</th><th>Nights</th><th>Check-out</th><th>Cost</th></tr></thead>
+      <tbody>${hotelRows_html}</tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">4. Transport</div>
+    <table>
+      <tr><th>Vehicle / Route</th><th>Rate</th></tr>
+      <tr>
+        <td>${transport ? `${transport.vehicleType} - ${transport.route}` : "-"}</td>
+        <td>SAR ${transportRate.toLocaleString()}</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="totals">
+    <table>
+      <tr><td style="padding:4px 10px">Visa Cost</td><td style="padding:4px 10px;text-align:right">SAR ${totalVisaCost.toLocaleString()}</td></tr>
+      <tr><td style="padding:4px 10px">Hotel Cost</td><td style="padding:4px 10px;text-align:right">SAR ${totalHotelCost.toLocaleString()}</td></tr>
+      <tr><td style="padding:4px 10px">Transport</td><td style="padding:4px 10px;text-align:right">SAR ${transportRate.toLocaleString()}</td></tr>
+      <tr><td style="padding:4px 10px;font-size:16px;font-weight:bold">Grand Total</td><td style="padding:4px 10px;text-align:right" class="grand-total">SAR ${grandTotal.toLocaleString()}</td></tr>
+    </table>
+  </div>
+
+  <div class="footer">This is a package calculation voucher. Prices are subject to change. &copy; Mirza Travel &amp; Tourism</div>
+</body>
+</html>`;
+
+    const win = window.open("", "_blank");
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    setTimeout(() => { win.print(); }, 500);
+  };
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" /></div>;
 
@@ -282,13 +393,21 @@ const UmrahCalculator = () => {
             </div>
           </div>
 
-          <button
-            onClick={() => toast.success("Package calculation saved!")}
-            className="px-8 py-3 font-bold rounded-lg text-white"
-            style={{ background: "linear-gradient(135deg, #f99f24, #EDDE5D)" }}
-          >
-            <FaCalculator className="inline mr-2" /> Proceed to results
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={handlePrintVoucher}
+              className="px-8 py-3 font-bold rounded-lg text-white flex items-center gap-2 bg-primary hover:opacity-90"
+            >
+              <FaPrint /> Print Voucher
+            </button>
+            <button
+              onClick={() => toast.success("Package calculation saved!")}
+              className="px-8 py-3 font-bold rounded-lg text-white flex items-center gap-2"
+              style={{ background: "linear-gradient(135deg, #f99f24, #EDDE5D)" }}
+            >
+              <FaCalculator className="inline mr-2" /> Proceed to results
+            </button>
+          </div>
         </div>
       </div>
     </div>

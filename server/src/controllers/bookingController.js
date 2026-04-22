@@ -32,8 +32,8 @@ export const createBooking = async (req, res) => {
         if (!existing) isUnique = true;
       }
 
-      // Set expiry (24 hours from now)
-      const expiryTime = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      // Set expiry (2 hours from now)
+      const expiryTime = new Date(Date.now() + 2 * 60 * 60 * 1000);
 
       // Create booking (sequential queries — Neon.tech serverless pooler doesn't support long transactions)
       const newBooking = await prisma.booking.create({
@@ -52,10 +52,15 @@ export const createBooking = async (req, res) => {
           expiryTime,
           passengers: passengers ? {
             create: passengers.map((p) => ({
+              title: p.title || null,
               name: p.name,
+              surname: p.surname || null,
               type: p.type,
               dob: p.dob ? new Date(p.dob) : null,
               passportNo: p.passportNo || null,
+              passportExpiry: p.passportExpiry ? new Date(p.passportExpiry) : null,
+              passportFrontUrl: p.passportFrontUrl || null,
+              passportBackUrl: p.passportBackUrl || null,
             })),
           } : undefined,
         },
@@ -100,7 +105,7 @@ export const createBooking = async (req, res) => {
         if (!existing) isUnique = true;
       }
 
-      const expiryTime = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      const expiryTime = new Date(Date.now() + 2 * 60 * 60 * 1000);
 
       const booking = await prisma.booking.create({
         data: {
@@ -210,6 +215,7 @@ export const getAllBookings = async (req, res) => {
           agent: { select: { id: true, agencyName: true, agentCode: true } },
           group: { include: { airline: true, sector: true } },
           package: true,
+          passengers: true,
         },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * limit,
@@ -220,6 +226,63 @@ export const getAllBookings = async (req, res) => {
 
     res.json({ bookings, total, page: parseInt(page), pages: Math.ceil(total / limit) });
   } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Admin: Get booking detail (with passengers)
+export const getBookingDetail = async (req, res) => {
+  try {
+    const booking = await prisma.booking.findUnique({
+      where: { id: parseInt(req.params.id) },
+      include: {
+        agent: { select: { id: true, agencyName: true, contactPerson: true, email: true, phone: true, agentCode: true } },
+        group: { include: { airline: true, sector: true, flightLegs: { orderBy: { legNumber: "asc" } } } },
+        package: true,
+        passengers: true,
+      },
+    });
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
+    res.json(booking);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Admin: Update booking passengers
+export const updateBookingPassengers = async (req, res) => {
+  try {
+    const bookingId = parseInt(req.params.id);
+    const { passengers } = req.body;
+
+    const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
+
+    // Delete existing passengers and recreate
+    await prisma.passenger.deleteMany({ where: { bookingId } });
+    const created = await prisma.passenger.createMany({
+      data: passengers.map((p) => ({
+        bookingId,
+        title: p.title || null,
+        name: p.name,
+        surname: p.surname || null,
+        type: p.type,
+        dob: p.dob ? new Date(p.dob) : null,
+        passportNo: p.passportNo || null,
+        passportExpiry: p.passportExpiry ? new Date(p.passportExpiry) : null,
+        passportFrontUrl: p.passportFrontUrl || null,
+        passportBackUrl: p.passportBackUrl || null,
+      })),
+    });
+
+    const updated = await prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: { passengers: true },
+    });
+
+    res.json({ message: "Passengers updated", booking: updated });
+  } catch (error) {
+    console.error("Update passengers error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

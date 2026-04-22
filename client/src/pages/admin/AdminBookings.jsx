@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { adminAPI } from "../../services/api";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaEye } from "react-icons/fa";
 import { useConfirm } from "../../components/common/ConfirmDialog";
+import BookingDetailModal from "../../components/admin/BookingDetailModal";
 
 const statusColors = {
   ON_REQUEST: "bg-yellow-100 text-yellow-800",
@@ -16,10 +16,8 @@ const statusColors = {
 const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({
-    status: "",
-    bookingType: "",
-  });
+  const [filters, setFilters] = useState({ status: "", bookingType: "" });
+  const [detailId, setDetailId] = useState(null);
   const { confirm, Dialog } = useConfirm();
 
   useEffect(() => { load(); }, []);
@@ -97,13 +95,14 @@ const AdminBookings = () => {
               <th className="px-3 py-3 text-left">Date</th>
               <th className="px-3 py-3 text-left">Status</th>
               <th className="px-3 py-3 text-left">Change Status</th>
+              <th className="px-3 py-3 text-center">Detail</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="9" className="px-4 py-10 text-center"><div className="flex items-center justify-center gap-2 text-gray-500"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /><span className="text-sm">Loading...</span></div></td></tr>
+              <tr><td colSpan="10" className="px-4 py-10 text-center"><div className="flex items-center justify-center gap-2 text-gray-500"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /><span className="text-sm">Loading...</span></div></td></tr>
             ) : bookings.length === 0 ? (
-              <tr><td colSpan="9" className="px-4 py-8 text-center text-gray-400">No bookings found</td></tr>
+              <tr><td colSpan="10" className="px-4 py-8 text-center text-gray-400">No bookings found</td></tr>
             ) : bookings.map((b, i) => (
               <tr key={b.id} className={`border-b ${i % 2 === 1 ? "bg-gray-50" : ""}`}>
                 <td className="px-3 py-3 font-bold text-primary">{b.bookingNo}</td>
@@ -136,17 +135,21 @@ const AdminBookings = () => {
                 </td>
                 <td className="px-3 py-3">
                   {b.status !== "CANCELLED" && (
-                    <select
-                      value={b.status}
-                      onChange={(e) => updateStatus(b.id, e.target.value)}
-                      className="px-2 py-1 border rounded text-xs"
-                    >
+                    <select value={b.status} onChange={(e) => updateStatus(b.id, e.target.value)}
+                      className="px-2 py-1 border rounded text-xs">
                       <option value="ON_REQUEST">On Request</option>
                       <option value="PARTIAL">Partial</option>
                       <option value="CONFIRMED">Confirmed</option>
                       <option value="CANCELLED">Cancelled</option>
                     </select>
                   )}
+                </td>
+                <td className="px-3 py-3 text-center">
+                  <button onClick={() => setDetailId(b.id)}
+                    className="w-8 h-8 rounded-full bg-primary/10 hover:bg-primary/20 text-primary flex items-center justify-center mx-auto"
+                    title="View Details">
+                    <FaEye />
+                  </button>
                 </td>
               </tr>
             ))}
@@ -156,7 +159,16 @@ const AdminBookings = () => {
           Total: {bookings.length} bookings
         </div>
       </div>
+
       {Dialog}
+
+      {detailId && (
+        <BookingDetailModal
+          bookingId={detailId}
+          onClose={() => setDetailId(null)}
+          onStatusChange={load}
+        />
+      )}
     </div>
   );
 };

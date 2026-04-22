@@ -82,6 +82,13 @@ export const bookingAPI = {
   getById: (id) => api.get(`/bookings/${id}`),
   getAll: (params) => api.get("/bookings", { params }),
   updateStatus: (id, data) => api.put(`/bookings/${id}/status`, data),
+  getDetail: (id) => api.get(`/bookings/${id}/detail`),
+  updatePassengers: (id, data) => api.put(`/bookings/${id}/passengers`, data),
+};
+
+// Upload APIs
+export const uploadAPI = {
+  passport: (formData) => api.post("/upload/passport", formData),
 };
 
 // Package APIs

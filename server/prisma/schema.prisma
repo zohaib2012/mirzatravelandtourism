@@ -200,12 +200,17 @@ model Booking {
 
 // ─── PASSENGERS ──────────────────────────────────────
 model Passenger {
-  id         Int           @id @default(autoincrement())
-  bookingId  Int           @map("booking_id")
-  name       String
-  type       PassengerType
-  dob        DateTime?     @db.Date
-  passportNo String?       @map("passport_no")
+  id                 Int           @id @default(autoincrement())
+  bookingId          Int           @map("booking_id")
+  title              String?
+  name               String
+  surname            String?
+  type               PassengerType
+  dob                DateTime?     @db.Date
+  passportNo         String?       @map("passport_no")
+  passportExpiry     DateTime?     @map("passport_expiry") @db.Date
+  passportFrontUrl   String?       @map("passport_front_url")
+  passportBackUrl    String?       @map("passport_back_url")
 
   booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 

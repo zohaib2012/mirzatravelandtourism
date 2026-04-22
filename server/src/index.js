@@ -11,6 +11,7 @@ import packageRoutes from "./routes/packageRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import publicRoutes from "./routes/publicRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
 import { startAutoCancelScheduler, runAutoCancel } from "./services/autoCancelService.js";
 
 const app = express();
@@ -37,6 +38,7 @@ app.use("/api/v1/packages", packageRoutes);
 app.use("/api/v1/payments", paymentRoutes);
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/public", publicRoutes);
+app.use("/api/v1/upload", uploadRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
