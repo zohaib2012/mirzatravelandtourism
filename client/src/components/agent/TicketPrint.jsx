@@ -31,21 +31,16 @@ const TicketPrint = ({ booking, onClose }) => {
       </tr>
     `).join("");
 
-    const paxHtml = passengers.map((p, i) => {
-      const parts = p.name.split(" ");
-      const surname = parts[parts.length - 1];
-      const given = parts.slice(0, -1).join(" ") || parts[0];
-      return `
+    const paxHtml = passengers.map((p, i) => `
         <tr>
           <td>${i + 1}</td>
-          <td>${p.type === "ADULT" ? "MR" : p.type === "INFANT" ? "INF" : "MSTR"}</td>
-          <td><strong>${surname}</strong></td>
-          <td>${given}</td>
+          <td>${p.title || (p.type === "ADULT" ? "MR" : p.type === "INFANT" ? "INF" : "MSTR")}</td>
+          <td><strong>${p.surname || "-"}</strong></td>
+          <td>${p.name || "-"}</td>
           <td>${p.type}</td>
           <td>${p.passportNo || "-"}</td>
         </tr>
-      `;
-    }).join("");
+      `).join("");
 
     const html = `
     <!DOCTYPE html>

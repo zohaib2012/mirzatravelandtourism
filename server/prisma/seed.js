@@ -7,7 +7,7 @@ async function main() {
   console.log("Seeding database...\n");
 
   // 1. Create Admin User (skip if exists with agentCode 0001)
-  let admin = await prisma.user.findUnique({ where: { email: "zohaib.khaleed@gmail.com" } });
+  let admin = await prisma.user.findUnique({ where: { email: "mirzatravel.pvt@gmail.com" } });
   if (!admin) {
     const existingWithCode = await prisma.user.findUnique({ where: { agentCode: "0001" } });
     const adminPassword = await bcrypt.hash("Admin@123", 12);
@@ -16,7 +16,7 @@ async function main() {
         agentCode: existingWithCode ? "0003" : "0001",
         agencyName: "Mirza Travel & Tourism",
         contactPerson: "Admin",
-        email: "zohaib.khaleed@gmail.com",
+        email: "mirzatravel.pvt@gmail.com",
         password: adminPassword,
         phone: "+923000000000",
         city: "Gujrat",

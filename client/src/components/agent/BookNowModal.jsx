@@ -169,8 +169,8 @@ const BookNowModal = ({ group, onClose, onSuccess }) => {
                   <tr>
                     <th className="px-2 py-2 text-left w-8">#</th>
                     <th className="px-2 py-2 text-left w-16">Title</th>
-                    <th className="px-2 py-2 text-left">Given Name</th>
-                    <th className="px-2 py-2 text-left">Sur Name</th>
+                    <th className="px-2 py-2 text-left w-36">Given Name</th>
+                    <th className="px-2 py-2 text-left w-36">Sur Name</th>
                     <th className="px-2 py-2 text-left w-20">Type</th>
                     <th className="px-2 py-2 text-left w-28">Passport #</th>
                     <th className="px-2 py-2 text-left w-28">Date of Birth</th>

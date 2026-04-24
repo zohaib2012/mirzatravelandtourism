@@ -141,7 +141,7 @@ const BookingDetail = () => {
             <h3>Passenger Details</h3>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[500px]">
               <thead className="bg-gray-800 text-white">
                 <tr>
                   <th className="px-3 py-2">Title</th>
@@ -152,22 +152,19 @@ const BookingDetail = () => {
                 </tr>
               </thead>
               <tbody>
-                {booking.passengers.map((p, i) => {
-                  const nameParts = p.name.split(" ");
-                  return (
-                    <tr key={p.id} className={i % 2 === 1 ? "bg-gray-50" : ""}>
-                      <td className="px-3 py-2">{p.type === "ADULT" ? "MR" : "MSTR"}</td>
-                      <td className="px-3 py-2 font-bold">{nameParts[nameParts.length - 1]}</td>
-                      <td className="px-3 py-2">{nameParts.slice(0, -1).join(" ") || nameParts[0]}</td>
-                      <td className="px-3 py-2">
-                        <span className={`px-2 py-0.5 rounded text-xs text-white ${p.type === "ADULT" ? "bg-blue-500" : p.type === "CHILD" ? "bg-green-500" : "bg-yellow-500"}`}>
-                          {p.type}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2">{p.passportNo || "-"}</td>
-                    </tr>
-                  );
-                })}
+                {booking.passengers.map((p, i) => (
+                  <tr key={p.id} className={i % 2 === 1 ? "bg-gray-50" : ""}>
+                    <td className="px-3 py-2">{p.title || (p.type === "ADULT" ? "MR" : "MSTR")}</td>
+                    <td className="px-3 py-2 font-bold">{p.surname || "-"}</td>
+                    <td className="px-3 py-2">{p.name}</td>
+                    <td className="px-3 py-2">
+                      <span className={`px-2 py-0.5 rounded text-xs text-white ${p.type === "ADULT" ? "bg-blue-500" : p.type === "CHILD" ? "bg-green-500" : "bg-yellow-500"}`}>
+                        {p.type}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2">{p.passportNo || "-"}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

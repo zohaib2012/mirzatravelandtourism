@@ -350,6 +350,12 @@ const FlightCard = ({ group, onBookNow, onCopy }) => {
           {(!group.flightLegs || group.flightLegs.length === 0) && (
             <p className="text-xs text-gray-400">Flight details pending</p>
           )}
+          {group.pnr1 && (
+            <div className="mt-2 inline-flex items-center gap-1.5 bg-blue-50 border border-blue-200 rounded px-2 py-1">
+              <span className="text-xs text-gray-500">PNR:</span>
+              <span className="text-xs font-bold font-mono text-primary tracking-widest">{group.pnr1}</span>
+            </div>
+          )}
         </div>
 
         {/* Seats */}

@@ -32,8 +32,7 @@ export const createBooking = async (req, res) => {
         if (!existing) isUnique = true;
       }
 
-      // Set expiry (2 hours from now)
-      const expiryTime = new Date(Date.now() + 2 * 60 * 60 * 1000);
+      const expiryTime = new Date(Date.now() + 55 * 60 * 1000);
 
       // Create booking (sequential queries — Neon.tech serverless pooler doesn't support long transactions)
       const newBooking = await prisma.booking.create({
@@ -105,7 +104,7 @@ export const createBooking = async (req, res) => {
         if (!existing) isUnique = true;
       }
 
-      const expiryTime = new Date(Date.now() + 2 * 60 * 60 * 1000);
+      const expiryTime = new Date(Date.now() + 55 * 60 * 1000);
 
       const booking = await prisma.booking.create({
         data: {
