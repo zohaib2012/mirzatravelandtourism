@@ -63,7 +63,7 @@ const TicketPrint = ({ booking, onClose }) => {
         .status-badge { display: inline-block; padding: 3px 10px; border-radius: 3px; font-weight: bold; font-size: 11px; }
         .status-confirmed { background: #d4edda; color: #155724; }
         .status-on-request { background: #fff3cd; color: #856404; }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 10px; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 10px; }
         .info-item { background: #f8f9fa; padding: 10px 14px; border-radius: 5px; border-left: 3px solid #FAAF43; }
         .info-label { font-size: 10px; color: #888; text-transform: uppercase; }
         .info-value { font-size: 13px; font-weight: bold; color: #0C446F; margin-top: 2px; }
@@ -109,6 +109,10 @@ const TicketPrint = ({ booking, onClose }) => {
             <div class="info-item">
               <div class="info-label">Group ID</div>
               <div class="info-value">AG-${booking.groupId}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">PNR</div>
+              <div class="info-value">${group?.pnr1 || "-"}${group?.pnr2 ? " / " + group.pnr2 : ""}</div>
             </div>
             <div class="info-item">
               <div class="info-label">Status</div>
