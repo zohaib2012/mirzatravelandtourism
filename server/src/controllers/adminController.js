@@ -1,5 +1,6 @@
 import prisma from "../config/db.js";
 import bcrypt from "bcryptjs";
+import { sendAgentApprovalEmail } from "../utils/agentEmail.js";
 
 // Dashboard stats
 export const getDashboardStats = async (req, res) => {
@@ -84,6 +85,12 @@ export const updateAgentStatus = async (req, res) => {
       data: { status },
       select: { id: true, agencyName: true, agentCode: true, email: true, status: true },
     });
+
+    if (status === "ACTIVE") {
+      sendAgentApprovalEmail(user.email, user.agentCode, user.agencyName)
+        .catch((err) => console.error("[updateAgentStatus] Email send failed:", err));
+    }
+
     res.json({ message: `Agent ${status.toLowerCase()}`, user });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
