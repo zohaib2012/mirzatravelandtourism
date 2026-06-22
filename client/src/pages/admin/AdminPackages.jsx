@@ -10,6 +10,7 @@ const emptyForm = {
   packageName: "", groupId: "", numDays: "", availableSeats: "",
   sharedPrice: "", doublePrice: "", triplePrice: "", quadPrice: "",
   departureDate: "", returnDate: "", status: "ACTIVE",
+  makkahHotels: "", madinahHotels: "",
 };
 
 const AdminPackages = () => {
@@ -54,6 +55,8 @@ const AdminPackages = () => {
       departureDate: pkg.departureDate ? format(new Date(pkg.departureDate), "yyyy-MM-dd") : "",
       returnDate: pkg.returnDate ? format(new Date(pkg.returnDate), "yyyy-MM-dd") : "",
       status: pkg.status || "ACTIVE",
+      makkahHotels: pkg.makkahHotels || "",
+      madinahHotels: pkg.madinahHotels || "",
     });
     setEditing(pkg);
     setModal(true);
@@ -118,6 +121,8 @@ const AdminPackages = () => {
               <th className="px-3 py-3 text-right">Triple (PKR)</th>
               <th className="px-3 py-3 text-right">Quad (PKR)</th>
               <th className="px-3 py-3 text-left">Departure</th>
+              <th className="px-3 py-3 text-left">Makkah Hotel</th>
+              <th className="px-3 py-3 text-left">Madinah Hotel</th>
               <th className="px-3 py-3 text-center">Bookings</th>
               <th className="px-3 py-3 text-left">Status</th>
               <th className="px-3 py-3 text-left">Actions</th>
@@ -125,9 +130,9 @@ const AdminPackages = () => {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="12" className="px-4 py-10 text-center"><div className="flex items-center justify-center gap-2 text-gray-500"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /><span className="text-sm">Loading...</span></div></td></tr>
+              <tr><td colSpan="14" className="px-4 py-10 text-center"><div className="flex items-center justify-center gap-2 text-gray-500"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /><span className="text-sm">Loading...</span></div></td></tr>
             ) : packages.length === 0 ? (
-              <tr><td colSpan="12" className="px-4 py-8 text-center text-gray-400">No packages found</td></tr>
+              <tr><td colSpan="14" className="px-4 py-8 text-center text-gray-400">No packages found</td></tr>
             ) : packages.map((pkg, i) => (
               <tr key={pkg.id} className={`border-b ${i % 2 === 1 ? "bg-gray-50" : ""}`}>
                 <td className="px-3 py-2 text-gray-500">{i + 1}</td>
@@ -151,6 +156,12 @@ const AdminPackages = () => {
                 <td className="px-3 py-2 text-right">{pkg.quadPrice ? Number(pkg.quadPrice).toLocaleString() : "-"}</td>
                 <td className="px-3 py-2 text-xs">
                   {pkg.departureDate ? format(new Date(pkg.departureDate), "dd MMM yyyy") : "-"}
+                </td>
+                <td className="px-3 py-2 text-xs text-gray-700 max-w-[180px] truncate" title={pkg.makkahHotels || ""}>
+                  {pkg.makkahHotels || "-"}
+                </td>
+                <td className="px-3 py-2 text-xs text-gray-700 max-w-[180px] truncate" title={pkg.madinahHotels || ""}>
+                  {pkg.madinahHotels || "-"}
                 </td>
                 <td className="px-3 py-2 text-center">{pkg._count?.bookings || 0}</td>
                 <td className="px-3 py-2">
@@ -218,6 +229,21 @@ const AdminPackages = () => {
               <div>
                 {label("Return Date")}
                 <input type="date" {...f("returnDate")} className={inputCls} />
+              </div>
+            </div>
+
+            {/* Makkah & Madinah Hotels */}
+            <div>
+              <h4 className="font-bold text-gray-700 mb-3 border-b pb-2">Hotel Names</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  {label("Makkah Hotel")}
+                  <input {...f("makkahHotels")} className={inputCls} placeholder="e.g. Hilton Makkah Convention Hotel" />
+                </div>
+                <div>
+                  {label("Madinah Hotel")}
+                  <input {...f("madinahHotels")} className={inputCls} placeholder="e.g. Pullman Zamzam Madina" />
+                </div>
               </div>
             </div>
 

@@ -253,6 +253,8 @@ model UmrahPackage {
   quadPrice      Decimal?    @map("quad_price") @db.Decimal(12, 2)
   departureDate  DateTime?   @map("departure_date") @db.Date
   returnDate     DateTime?   @map("return_date") @db.Date
+  makkahHotels   String?     @map("makkah_hotels")
+  madinahHotels  String?     @map("madinah_hotels")
   status         GroupStatus @default(ACTIVE)
   createdAt      DateTime    @default(now()) @map("created_at")
   updatedAt      DateTime    @updatedAt @map("updated_at")

@@ -50,7 +50,8 @@ export const getPackageById = async (req, res) => {
 export const createPackage = async (req, res) => {
   try {
     const { packageName, groupId, numDays, availableSeats, sharedPrice, doublePrice,
-      triplePrice, quadPrice, departureDate, returnDate, hotels, transportId, transportCost } = req.body;
+      triplePrice, quadPrice, departureDate, returnDate, makkahHotels, madinahHotels,
+      hotels, transportId, transportCost } = req.body;
 
     const pkg = await prisma.umrahPackage.create({
       data: {
@@ -64,6 +65,8 @@ export const createPackage = async (req, res) => {
         quadPrice: quadPrice ? parseFloat(quadPrice) : null,
         departureDate: departureDate ? new Date(departureDate) : null,
         returnDate: returnDate ? new Date(returnDate) : null,
+        makkahHotels,
+        madinahHotels,
         packageHotels: hotels ? {
           create: hotels.map((h, i) => ({
             hotelId: parseInt(h.hotelId),
@@ -100,7 +103,8 @@ export const updatePackage = async (req, res) => {
   try {
     const { id } = req.params;
     const { packageName, groupId, numDays, availableSeats, sharedPrice, doublePrice,
-      triplePrice, quadPrice, departureDate, returnDate, status, hotels, transportId, transportCost } = req.body;
+      triplePrice, quadPrice, departureDate, returnDate, status, makkahHotels, madinahHotels,
+      hotels, transportId, transportCost } = req.body;
 
     const data = {};
     if (packageName) data.packageName = packageName;
@@ -114,6 +118,8 @@ export const updatePackage = async (req, res) => {
     if (departureDate) data.departureDate = new Date(departureDate);
     if (returnDate) data.returnDate = new Date(returnDate);
     if (status) data.status = status;
+    if (makkahHotels !== undefined) data.makkahHotels = makkahHotels;
+    if (madinahHotels !== undefined) data.madinahHotels = madinahHotels;
 
     const pkg = await prisma.umrahPackage.update({
       where: { id: parseInt(id) },
