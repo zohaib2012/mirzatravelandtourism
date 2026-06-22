@@ -10,11 +10,5 @@
       "src": "/(.*)",
       "dest": "src/index.js"
     }
-  ],
-  "crons": [
-    {
-      "path": "/api/cron/auto-cancel",
-      "schedule": "0 0 * * *"
-    }
   ]
 }
